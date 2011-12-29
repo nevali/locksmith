@@ -1,0 +1,14 @@
+This is keytool, a utility for manipulating public and private keys.
+
+Current status:
+	- Keys can currently be read only in PEM format.
+	- Public keys can be written as PEM, SSH-2, OpenSSH, plain text, and
+	  PGP format.
+	- Private keys can be written as PEM or plain text.
+	- The -C option can be used to specify a user ID when writing PGP keys.
+      Using this requires a private key, because a user ID must be
+	  accompanied by a signature packet. Without -C, only a single PGP
+	  public key packet will be written.
+	- The -B (SSH bubblebabble digest) option is currently unimplemented.
+	- The -f (PKCS/SHA-1 fingerprint) option is currently unimplemented.
+	- DSA support is spotty (DSA keys cannot currently be generated).
