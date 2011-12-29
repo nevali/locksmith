@@ -91,6 +91,9 @@ struct kt_pgpkeyid_s
 typedef int (*kt_input_handler)(kt_key *key, BIO *bin, kt_args *args);
 typedef int (*kt_output_handler)(kt_key *key, BIO *bout, kt_args *args);
 
+extern const char *progname;
+extern BIO *bio_err;
+
 extern kt_keytype kt_type(const char *str);
 extern const char *kt_type_printname(kt_keytype type);
 
@@ -102,6 +105,8 @@ extern int text_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int pem_input(kt_key *key, BIO *bin, kt_args *args);
 extern int pem_output(kt_key *key, BIO *bout, kt_args *args);
+
+extern int der_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int openssh_output(kt_key *key, BIO *bout, kt_args *args);
 

@@ -45,7 +45,7 @@ ssh_fingerprint(kt_key *k, BIO *bout, kt_args *args)
 	case KT_DSA:
 		break;
 	default:
-		BIO_printf(args->berr, "ssh: unable to generate an SSH fingerprint for a %s key\n", kt_type_printname(k->type));
+		BIO_printf(args->berr, "%s: SSH: unable to generate an SSH fingerprint for a %s key\n", progname, kt_type_printname(k->type));
 		return 1;
 	}
 	/* Create a sink BIO for writing the digest material to */
@@ -58,12 +58,12 @@ ssh_fingerprint(kt_key *k, BIO *bout, kt_args *args)
 	ssh_write_pubkey_bio(k, tmp);
 	BIO_get_md(md, &digest);
 	mdlen = BIO_gets(md, (char *) mdbuf, EVP_MAX_MD_SIZE);
-	BIO_printf(args->berr, "%d", k->size);
+	BIO_printf(bout, "%d", k->size);
 	for(i = 0; i < mdlen; i++)
 	{
-		BIO_printf(args->berr, "%c%02x", (i ? ':' : ' '), mdbuf[i]);
+		BIO_printf(bout, "%c%02x", (i ? ':' : ' '), mdbuf[i]);
 	}
-	BIO_printf(args->berr, " %s (%s)\n", (args->comment ? args->comment : args->infile), kt_type_printname(k->type));
+	BIO_printf(bout, " %s (%s)\n", (args->comment ? args->comment : args->infile), kt_type_printname(k->type));
 	BIO_free_all(tmp);
 	return 0;
 }
@@ -84,7 +84,7 @@ ssh_output(kt_key *k, BIO *bout, kt_args *args)
 	case KT_DSA:
 		break;
 	default:
-		BIO_printf(args->berr, "ssh: unable to write a %s key in SSH-2 format\n", kt_type_printname(k->type));
+		BIO_printf(args->berr, "%s: SSH: unable to write a %s key in SSH-2 format\n", progname, kt_type_printname(k->type));
 		return 1;
 	}
 	b64 = BIO_new(BIO_f_base64());

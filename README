@@ -2,9 +2,10 @@ This is keytool, a utility for manipulating public and private keys.
 
 Current status:
 	- Keys can currently be read only in PEM format.
-	- Public keys can be written as PEM, SSH-2, OpenSSH, plain text, and
-	  PGP format.
-	- Private keys can be written as PEM or plain text.
+	- Public keys can be written as PEM, DER, SSH-2, OpenSSH, plain text,
+      and PGP format.
+	- Private keys can be written as PEM, DER or plain text.
+	- Encrypted keys can't be read or written at the moment.
 	- The -C option can be used to specify a user ID when writing PGP keys.
       Using this requires a private key, because a user ID must be
 	  accompanied by a signature packet. Without -C, only a single PGP

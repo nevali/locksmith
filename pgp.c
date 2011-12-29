@@ -87,7 +87,7 @@ pgp_output(kt_key *key, BIO *bout, kt_args *args)
 	case KT_ELGAMAL:
 		break;
 	default:
-		BIO_printf(args->berr, "pgp: Cannot write a PGP certificate for a %s key\n", kt_type_printname(key->type));
+		BIO_printf(args->berr, "%s: PGP: Cannot write a PGP certificate for a %s key\n", progname, kt_type_printname(key->type));
 		return 1;
 	}
 	if((r = pgp_write_pubkey_packet(bout, key)))
@@ -104,7 +104,7 @@ pgp_output(kt_key *key, BIO *bout, kt_args *args)
 		}
 		else
 		{
-			BIO_printf(args->berr, "pgp: Warning: Not writing user ID '%s' because there is no private key to generate signature\n", args->comment);
+			BIO_printf(args->berr, "%s: PGP: Warning: Not writing user ID '%s' because there is no private key to generate signature\n", progname, args->comment);
 		}
 	}
 	return 0;
@@ -124,7 +124,7 @@ pgp_keyid(kt_key *key, BIO *bout, kt_args *args)
 	const struct tm *tm;
 	char dbuf[16];
 
-	(void) bout;
+	(void) args;
 
 	/* To get the key ID, create a null BIO and write the pubkey
 	 *  packet to it.
@@ -148,7 +148,7 @@ pgp_keyid(kt_key *key, BIO *bout, kt_args *args)
 	}
 	tm = gmtime(&(key->timestamp));
 	strftime(dbuf, sizeof(dbuf) - 1, "%Y-%m-%d", tm);
-	BIO_printf(args->berr, "pub %6d%c/%08qX %s\n", key->size, type, (unsigned long long) key->keyid->id, dbuf);
+	BIO_printf(bout, "pub %6d%c/%08qX %s\n", key->size, type, (unsigned long long) key->keyid->id, dbuf);
 	return 0;
 }
 
@@ -254,7 +254,7 @@ pgp_write_key_material(BIO *bout, kt_key *key)
 		pgp_write_bn(bout, key->k.rsa->e);
 		break;
 	default:
-		fprintf(stderr, "pgp: Cannot write a public key packet for a %s key\n", kt_type_printname(key->type));
+		BIO_printf(bio_err, "%s: PGP: Cannot write a public key packet for a %s key\n", progname, kt_type_printname(key->type));
 		return -1;
 	}
 	return 0;
@@ -491,7 +491,7 @@ pgp_write_digest_signature(BIO *bout, int hash, kt_key *key, const unsigned char
 		nid = NID_sha1;
 		break;
 	default:
-		fprintf(stderr, "pgp: Unable to generate signature for hash algorithm %d\n", hash);
+		BIO_printf(bio_err, "%s: PGP: Unable to generate signature for hash algorithm %d\n", progname, hash);
 		return -1;
 	}
 	switch(key->type)
@@ -509,7 +509,7 @@ pgp_write_digest_signature(BIO *bout, int hash, kt_key *key, const unsigned char
 		}
 		break;
 	default:
-		fprintf(stderr, "pgp: Unable to produce a signature using a %s key\n", kt_type_printname(key->type));
+		BIO_printf(bio_err, "%s: PGP: Unable to produce a signature using a %s key\n", progname, kt_type_printname(key->type));
 	}
 	if(r == 0)
 	{

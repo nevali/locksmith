@@ -1,5 +1,5 @@
 OUT = keytool
-OBJ = keytool.o generate.o text.o pem.o openssh.o ssh.o pgp.o
+OBJ = keytool.o generate.o text.o pem.o openssh.o ssh.o pgp.o der.o
 
 CFLAGS = -W -Wall -O0 -g
 

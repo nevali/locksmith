@@ -44,6 +44,7 @@ static kt_handler_entry handlers[] =
 {
 	{ "text", "text", "Readable information about the key's contents", NULL, text_output },
 	{ "pem", "PEM", "Privacy Enhanced Mail (PEM) format", pem_input, pem_output },
+	{ "der", "DER", "ASN.1 Distinguished Encoding Rules (DER) format", NULL, der_output },
 	{ "openssh", "OpenSSH", "OpenSSH key format", NULL, openssh_output },
 	{ "ssh2", "SSH-2", "SSH-2 (RFC4716) key format", NULL, ssh_output },
 	{ "pgp", "PGP", "OpenPGP (RFC4880) version 4 key format", NULL, pgp_output },
@@ -56,6 +57,9 @@ static kt_typestr keytypes[] =
 	{ "dsa", "DSA", "Digital Signature Algorithm (DSA)", KT_DSA },
 	{ NULL, NULL, NULL, KT_ERROR }
 };
+
+const char *progname = "keytool";
+BIO *bio_err = NULL;
 
 kt_keytype
 kt_type(const char *str)
@@ -94,7 +98,7 @@ init_output(BIO *file, kt_args *args)
 	{
 		if (BIO_write_filename(file, (char *) args->outfile) <= 0)
 		{
-			BIO_printf(args->berr, "Failed to open '%s' for writing\n", args->outfile);
+			BIO_printf(args->berr, "%s: Failed to open '%s' for writing\n", progname, args->outfile);
 			ERR_print_errors(args->berr);
 			return 1;
 		}
@@ -118,7 +122,7 @@ init_input(BIO *file, kt_args *args)
 	{
 		if (BIO_read_filename(file, args->infile) <= 0)
 		{
-			BIO_printf(args->berr,"problems opening %s\n", args->infile);
+			BIO_printf(args->berr, "%s: Failed to open %s for reading\n", progname, args->infile);
 			ERR_print_errors(args->berr);
 			return 1;
 		}
@@ -155,7 +159,7 @@ usage(void)
 	fprintf(stderr, "Public- and private-key manipulation utility\n\n");
 
 	fprintf(stderr, "Usage:\n"
-			"  keytool [OPTIONS] [< KEY-IN] [> KEY-OUT]\n"
+			"  %s [OPTIONS] [< KEY-IN] [> KEY-OUT]\n"
 			"\n"
 			"OPTIONS is one or more of:\n"
 			"\n"
@@ -174,7 +178,7 @@ usage(void)
 			"  -p                Read a private key\n"
 			"  -P                Write the private key (implies -p)\n"
 			"  -C COMMENT        Key comment (SSH)/user ID (PGP)\n"
-			"\n");
+			"\n", progname);
 	
 	fprintf(stderr, "FORMAT is one of:\n\n");
 	for(c = 0; handlers[c].name; c++)
@@ -193,6 +197,7 @@ usage(void)
 int
 main(int argc, char **argv)
 {
+	const char *t;
 	kt_key k;
 	kt_args args;
 	BIO *bin, *berr, *bout;
@@ -200,10 +205,23 @@ main(int argc, char **argv)
 	kt_handler_entry *input_handler = NULL;
 	int r, c;
 
+	if(argv[0] && argv[0][0])
+	{
+		if((t = strrchr(argv[0], '/')))
+		{
+			t++;
+			progname = t;
+		}
+		else
+		{
+			progname = argv[0];
+		}
+	}
 	memset(&k, 0, sizeof(k));
 	memset(&args, 0, sizeof(args));
 	berr = BIO_new(BIO_s_file());
 	BIO_set_fp(berr, stderr, BIO_NOCLOSE|BIO_FP_TEXT);
+	bio_err = berr;
 	args.berr = berr;
 	args.timestamp = time(NULL);
 
@@ -220,14 +238,14 @@ main(int argc, char **argv)
 		case 'I':
 			if(NULL == (input_handler = find_handler(optarg)))
 			{
-				BIO_printf(berr, "Unknown input format '%s'\n", optarg);
+				BIO_printf(berr, "%s: Unknown input format '%s'\n", progname, optarg);
 				return 1;
 			}
 			break;
 		case 'O':			
 			if(NULL == (output_handler = find_handler(optarg)))
 			{
-				BIO_printf(berr, "Unknown output format '%s'\n", optarg);
+				BIO_printf(berr, "%s: Unknown output format '%s'\n", progname, optarg);
 				return 1;
 			}
 			break;
@@ -261,7 +279,7 @@ main(int argc, char **argv)
 		case 't':
 			if(KT_ERROR == (k.type = kt_type(optarg)))
 			{
-				BIO_printf(berr, "Unknown key type '%s'\n", optarg);
+				BIO_printf(berr, "%s: Unknown key type '%s'\n", progname, optarg);
 				return 1;
 			}
 			break;
@@ -286,12 +304,12 @@ main(int argc, char **argv)
 	}
 	if(args.generate && k.type == KT_UNKNOWN)
 	{
-		BIO_printf(berr, "A key type must be specified with -t when generating a new key\n");
+		BIO_printf(berr, "%s: A key type must be specified with -t when generating a new key\n", progname);
 		return 1;
 	}
 	if(input_handler && !input_handler->input)
 	{
-		BIO_printf(berr, "keys cannot be read in %s format\n", input_handler->printname);
+		BIO_printf(berr, "%s: Keys cannot be read in %s format\n", progname, input_handler->printname);
 		return 1;
 	}
 	if(args.generate)
@@ -311,7 +329,7 @@ main(int argc, char **argv)
 		}
 		if(!input_handler)
 		{
-			/* detect */
+			/* XXX: Need to add a detection process */
 			input_handler = find_handler("pem");
 		}
 	}
@@ -323,7 +341,7 @@ main(int argc, char **argv)
 		}
 		if(!output_handler->output)
 		{
-			BIO_printf(berr, "Keys cannot be written in %s format\n", output_handler->printname);
+			BIO_printf(berr, "%s: Keys cannot be written in %s format\n", progname, output_handler->printname);
 			return 1;
 		}
 	}
