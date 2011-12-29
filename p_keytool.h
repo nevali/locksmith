@@ -23,6 +23,9 @@
 # include <unistd.h>
 # include <inttypes.h>
 # include <time.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <unistd.h>
 # include <openssl/err.h>
 # include <openssl/buffer.h>
 # include <openssl/bn.h>
@@ -33,6 +36,13 @@
 # include <openssl/engine.h>
 # include <openssl/objects.h>
 # include <openssl/x509.h>
+
+# ifndef MIN
+#  define MIN(a, b)                     ((a) < (b) ? (a) : (b))
+# endif
+# ifndef MIN3
+#  define MIN3(a, b, c)                 MIN(a, MIN(b, c))
+# endif
 
 typedef struct kt_key_s kt_key;
 typedef struct kt_args_s kt_args;
@@ -70,6 +80,7 @@ struct kt_args_s
 	int noout;
 	int sha1;
 	int pgpid;
+	int pgpfp;
 	int md5;
 	int bubble;
 	int readpriv;
@@ -118,6 +129,7 @@ extern unsigned char *ssh_write_bn(BIO *bout, BIGNUM *num, unsigned char *buf, s
 
 extern int pgp_output(kt_key *key, BIO *bout, kt_args *args);
 extern int pgp_keyid(kt_key *key, BIO *bout, kt_args *args);
+extern int pgp_fingerprint(kt_key *key, BIO *bout, kt_args *args);
 
 extern int pgp_write_pubkey_packet(BIO *bout, kt_key *key);
 extern int pgp_write_pubkey_packet_body(BIO *bout, kt_key *key, time_t timestamp);

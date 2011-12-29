@@ -112,8 +112,10 @@ init_output(BIO *file, kt_args *args)
 }
 
 static int
-init_input(BIO *file, kt_args *args)
+init_input(BIO *file, kt_args *args, kt_key *k)
 {
+	struct stat sbuf;
+
 	if(args->generate)
 	{
 		return 0;
@@ -125,6 +127,10 @@ init_input(BIO *file, kt_args *args)
 			BIO_printf(args->berr, "%s: Failed to open %s for reading\n", progname, args->infile);
 			ERR_print_errors(args->berr);
 			return 1;
+		}
+		if(!stat(args->infile, &sbuf))
+		{
+			k->timestamp = MIN3(sbuf.st_mtime, sbuf.st_atime, sbuf.st_ctime);
 		}
 	}
 	else
@@ -173,6 +179,7 @@ usage(void)
 			"  -g                Generate a new key (implies -P)\n"
 			"  -f                Print the PKCS (SHA-1) key fingerprint\n"
 			"  -k                Print the PGP key ID\n"
+			"  -F                Print the PGP key fingerprint\n"
 			"  -s                Print the SSH (MD5) key fingerprint\n"
 			"  -B                Print the SSH bubblebabble key digest\n"
 			"  -p                Read a private key\n"
@@ -224,8 +231,8 @@ main(int argc, char **argv)
 	bio_err = berr;
 	args.berr = berr;
 	args.timestamp = time(NULL);
-
-	while((c = getopt(argc, argv, "i:o:I:O:t:C:TgnfksBpPh")) != -1)
+	k.timestamp = args.timestamp;
+	while((c = getopt(argc, argv, "i:o:I:O:t:C:TgnfksBpPhF")) != -1)
 	{
 		switch(c)
 		{
@@ -263,6 +270,9 @@ main(int argc, char **argv)
 			break;
 		case 'B':
 			args.bubble = 1;
+			break;
+		case 'F':
+			args.pgpfp = 1;
 			break;
 		case 'p':
 			args.readpriv = 1;
@@ -323,7 +333,7 @@ main(int argc, char **argv)
 			ERR_print_errors(berr);
 			return 1;
 		}
-		if(init_input(bin, &args))
+		if(init_input(bin, &args, &k))
 		{
 			return 1;
 		}
@@ -355,7 +365,6 @@ main(int argc, char **argv)
 		return 1;
 	}
 	/* Generate a new key or read the input file */
-	k.timestamp = args.timestamp;
 	if(args.generate)
 	{
 		if((r = kt_generate(&k, &args)))
@@ -378,6 +387,10 @@ main(int argc, char **argv)
 	if(args.pgpid)
 	{
 		pgp_keyid(&k, bout, &args);
+	}
+	if(args.pgpfp)
+	{
+		pgp_fingerprint(&k, bout, &args);
 	}
 	if(!args.noout)
 	{

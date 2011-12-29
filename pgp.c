@@ -110,6 +110,37 @@ pgp_output(kt_key *key, BIO *bout, kt_args *args)
 	return 0;
 }
 
+/* Print a PGP key fingerprint, as colon-separated octets in hexademical
+ * form.
+ */
+int
+pgp_fingerprint(kt_key *key, BIO *bout, kt_args *args)
+{
+	BIO *nbio;
+	size_t n;
+	int r;
+
+	(void) args;
+
+	nbio = BIO_new(BIO_s_null());
+	r = pgp_write_pubkey_packet(nbio, key);
+	BIO_free(nbio);
+	if(r)
+	{
+		return r;
+	}
+	for(n = 0; n < key->keyid->fplen; n++)
+	{
+		if(n)
+		{
+			BIO_write(bout, ":", 1);
+		}
+		BIO_printf(bout, "%02x", key->keyid->fingerprint[n]);
+	}
+	BIO_write(bout, "\n", 1);
+	return 0;
+}
+
 /* Print a PGP key ID in the form:
  * pub   <size><type>/<keyid> <created-timestamp>
  *
