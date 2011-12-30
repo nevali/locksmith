@@ -50,6 +50,7 @@ static kt_handler_entry handlers[] =
 	{ "pgp", "PGP", "OpenPGP (RFC4880) version 4 key format", NULL, pgp_output },
 	{ "rdfxml", "RDF/XML", "RDF/XML format", NULL, rdfxml_output },
 	{ "turtle", "Turtle", "RDF (Turtle) format", NULL, turtle_output },
+	{ "dnssec", "DNSSEC", "DNSSEC key format", NULL, dnssec_output },
 	{ NULL, NULL, NULL, NULL, NULL }
 };
 
@@ -199,6 +200,9 @@ usage(void)
 			"  -Xunsigned        Emit an unsigned user ID (requires -C)\n"
 			"\n");
 
+	fprintf(stderr, "DNSSEC-specific options:\n"
+			"  -Xdomain=DOMAIN   Specify doman name for a zone key\n"
+			"\n");
 	fprintf(stderr, "FORMAT is one of:\n\n");
 	for(c = 0; handlers[c].name; c++)
 	{
@@ -223,6 +227,18 @@ process_extended_opt(const char *name, const char *value, kt_args *args)
 	{
 		r = (*value) ? 2 : 0;
 		args->nosign = 1;	   
+	}
+	else if(!strcmp(name, "domain"))
+	{
+		if(*value)
+		{
+			args->domain = value;
+			r = 0;
+		}
+		else
+		{
+			r = 3;
+		}
 	}
 	switch(r)
 	{

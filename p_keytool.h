@@ -96,6 +96,7 @@ struct kt_args_s
 	int nosign;
 	int ts_explicit;
 	int kts_explicit;
+	const char *domain;
 };
 
 struct kt_pgpkeyid_s
@@ -164,5 +165,7 @@ extern int pgp_write_digest_signature(BIO *bout, int hash, kt_key *key, const un
 extern int rdfxml_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int turtle_output(kt_key *key, BIO *bout, kt_args *args);
+
+extern int dnssec_output(kt_key *key, BIO *bout, kt_args *args);
 
 #endif /*!P_KEYTOOL_H_*/
