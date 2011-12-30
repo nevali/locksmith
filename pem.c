@@ -65,7 +65,7 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 			}
 			if(pkey == NULL)
 			{
-				BIO_printf(args->berr, "PEM: unable to load key from %s\n", args->infile);
+				BIO_printf(args->berr, "%s: PEM: unable to load key from %s\n", progname, args->infile);
 				ERR_print_errors(args->berr);
 				return 1;
 			}
@@ -83,7 +83,7 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 		k->k.dsa = EVP_PKEY_get1_DSA(pkey);
 		break;
 	default:
-		BIO_printf(args->berr, "PEM: unable to handle a %d key\n", t);
+		BIO_printf(args->berr, "%s: PEM: unable to handle a %d key\n", progname, t);
 		return 1;
 	}
 	EVP_PKEY_assign(pkey, EVP_PKEY_NONE, NULL);
@@ -93,7 +93,7 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 	 */
 	if(k->type != KT_UNKNOWN && k->type != ktype)
 	{
-		BIO_printf(args->berr, "expected a key of type %d but read a key of type %d\n", k->type, ktype);
+		BIO_printf(args->berr, "%s: PEM: expected a %s key, but read a %s key\n", progname, kt_type_printname(k->type), kt_type_printname(ktype));
 		return 1;
 	}
 	k->type = ktype;
