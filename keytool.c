@@ -52,7 +52,8 @@ static kt_handler_entry handlers[] =
 	{ "turtle", "Turtle", "RDF (Turtle) format", NULL, turtle_output },
 	{ "dnssec", "DNSSEC", "DNSSEC key format", NULL, dnssec_output },
 	{ "ipgp", "CERT IPGP", "DNS CERT record (RFC4938) type 6 (indirect PGP)", NULL, cert_ipgp_output },
-	{ NULL, NULL, NULL, NULL, NULL }
+	{ "pka", "PKA", "DNS PKA record", NULL, pka_output },
+	{ NULL, NULL, NULL, NULL, NULL }	
 };
 
 static kt_typestr keytypes[] = 

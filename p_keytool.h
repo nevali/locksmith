@@ -173,4 +173,6 @@ extern int dnssec_write_bn_base64(BIO *bout, const char *prefix, BIGNUM *num, co
 
 extern int cert_ipgp_output(kt_key *key, BIO *bout, kt_args *args);
 
+extern int pka_output(kt_key *key, BIO *bout, kt_args *args);
+
 #endif /*!P_KEYTOOL_H_*/
