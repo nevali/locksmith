@@ -51,6 +51,7 @@ static kt_handler_entry handlers[] =
 	{ "rdfxml", "RDF/XML", "RDF/XML format", NULL, rdfxml_output },
 	{ "turtle", "Turtle", "RDF (Turtle) format", NULL, turtle_output },
 	{ "dnssec", "DNSSEC", "DNSSEC key format", NULL, dnssec_output },
+	{ "ipgp", "CERT IPGP", "DNS CERT record (RFC4938) type 6 (indirect PGP)", NULL, cert_ipgp_output },
 	{ NULL, NULL, NULL, NULL, NULL }
 };
 
