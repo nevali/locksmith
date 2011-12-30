@@ -1,17 +1,26 @@
 This is keytool, a utility for manipulating public and private keys.
 
+http://github.com/nevali/keytool
+
 Current status:
 	- Keys can currently be read in PEM or DER formats. For DER private
 	  key input, you must explicitly specify the type of key using
 	  '-t TYPE'. This is not required when reading public keys.
+
 	- Public keys can be written as PEM, DER, SSH-2, OpenSSH, plain text,
-      and PGP format.
+	  and PGP format.
+
 	- Private keys can be written as PEM, DER or plain text.
+
 	- Encrypted keys can't be read or written at the moment.
+
 	- The -C option can be used to specify a user ID when writing PGP keys.
-      Using this requires a private key, because a user ID must be
+	  Using this requires a private key, because a user ID must be
 	  accompanied by a signature packet. Without -C, only a single PGP
 	  public key packet will be written.
+
 	- The -B (SSH bubblebabble digest) option is currently unimplemented.
+
 	- The -f (PKCS/SHA-1 fingerprint) option is currently unimplemented.
+
 	- DSA support is spotty (DSA keys cannot currently be generated).
