@@ -44,7 +44,7 @@ static kt_handler_entry handlers[] =
 {
 	{ "text", "text", "Readable information about the key's contents", NULL, text_output },
 	{ "pem", "PEM", "Privacy Enhanced Mail (PEM) format", pem_input, pem_output },
-	{ "der", "DER", "ASN.1 Distinguished Encoding Rules (DER) format", NULL, der_output },
+	{ "der", "DER", "ASN.1 Distinguished Encoding Rules (DER) format", der_input, der_output },
 	{ "openssh", "OpenSSH", "OpenSSH key format", NULL, openssh_output },
 	{ "ssh2", "SSH-2", "SSH-2 (RFC4716) key format", NULL, ssh_output },
 	{ "pgp", "PGP", "OpenPGP (RFC4880) version 4 key format", NULL, pgp_output },

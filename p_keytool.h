@@ -117,6 +117,7 @@ extern int text_output(kt_key *key, BIO *bout, kt_args *args);
 extern int pem_input(kt_key *key, BIO *bin, kt_args *args);
 extern int pem_output(kt_key *key, BIO *bout, kt_args *args);
 
+extern int der_input(kt_key *key, BIO *bout, kt_args *args);
 extern int der_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int openssh_output(kt_key *key, BIO *bout, kt_args *args);

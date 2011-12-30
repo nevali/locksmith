@@ -1,7 +1,9 @@
 This is keytool, a utility for manipulating public and private keys.
 
 Current status:
-	- Keys can currently be read only in PEM format.
+	- Keys can currently be read in PEM or DER formats. For DER private
+	  key input, you must explicitly specify the type of key using
+	  '-t TYPE'. This is not required when reading public keys.
 	- Public keys can be written as PEM, DER, SSH-2, OpenSSH, plain text,
       and PGP format.
 	- Private keys can be written as PEM, DER or plain text.
