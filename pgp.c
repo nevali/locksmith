@@ -96,7 +96,11 @@ pgp_output(kt_key *key, BIO *bout, kt_args *args)
 	}
 	if(args->comment)
 	{
-		if(key->privkey)
+		if(args->nosign)
+		{
+			pgp_write_userid_packet(bout, args->comment);
+		}
+		else if(key->privkey)
 		{
 			pgp_write_userid_packet(bout, args->comment);
 			/* Sign the user ID using our key */
@@ -104,7 +108,7 @@ pgp_output(kt_key *key, BIO *bout, kt_args *args)
 		}
 		else
 		{
-			BIO_printf(args->berr, "%s: PGP: Warning: Not writing user ID '%s' because there is no private key to generate signature\n", progname, args->comment);
+			BIO_printf(args->berr, "%s: PGP: Warning: Not writing user ID '%s' because there is no private key to generate signature and -Xnosign wasn't specified\n", progname, args->comment);
 		}
 	}
 	return 0;

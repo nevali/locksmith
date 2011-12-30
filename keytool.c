@@ -185,8 +185,13 @@ usage(void)
 			"  -p                Read a private key\n"
 			"  -P                Write the private key (implies -p)\n"
 			"  -C COMMENT        Key comment (SSH)/user ID (PGP)\n"
+			"  -Xopt[=value]     Format-specific options (see below)\n"
 			"\n", progname);
 	
+	fprintf(stderr, "PGP-specific options:\n"
+			"  -Xunsigned        Emit an unsigned user ID (requires -C)\n"
+			"\n");
+
 	fprintf(stderr, "FORMAT is one of:\n\n");
 	for(c = 0; handlers[c].name; c++)
 	{
@@ -199,6 +204,66 @@ usage(void)
 	{
 		fprintf(stderr, "  %-17s %s\n", keytypes[c].name, keytypes[c].desc);
 	}
+}
+
+static int
+process_extended_opt(const char *name, const char *value, kt_args *args)
+{
+	int r;
+
+	r = 1;
+	if(!strcmp(name, "unsigned"))
+	{
+		r = (*value) ? 2 : 0;
+		args->nosign = 1;	   
+	}
+	switch(r)
+	{
+	case -1:
+		break;
+	case 1:
+		BIO_printf(args->berr, "%s: unrecognised option `-X%s'\n", progname, name);
+		break;
+	case 2:
+		BIO_printf(args->berr, "%s: warning: option `-X%s' does not accept an argument (ignored)\n", progname, name);
+		r = 0;
+		break;
+	case 3:
+		BIO_printf(args->berr, "%s: option `-X%s' requires an argument\n", progname, name);
+		break;
+	}
+	return r;
+}
+
+static int
+handle_extended_arg(const char *opt, kt_args *args)
+{
+	const char *value;
+	char namebuf[32];
+
+	value = strchr(opt, '=');
+	if(value)
+	{
+		if((size_t) (value - opt) >= sizeof(namebuf))
+		{
+			BIO_printf(args->berr, "%s: unrecognised option `-X%s'\n", progname, opt);
+			return -1;
+		}
+		strncpy(namebuf, opt, value - opt);
+		namebuf[value - opt] = 0;
+		value++;
+	}
+	else
+	{
+		if(strlen(opt) >= sizeof(namebuf))
+		{
+			BIO_printf(args->berr, "%s: unrecognised option `-X%s'\n", progname, opt);
+			return -1;
+		}
+		strcpy(namebuf, opt);
+		value = "";
+	}
+	return process_extended_opt(namebuf, value, args);
 }
 
 int
@@ -232,7 +297,7 @@ main(int argc, char **argv)
 	args.berr = berr;
 	args.timestamp = time(NULL);
 	k.timestamp = args.timestamp;
-	while((c = getopt(argc, argv, "i:o:I:O:t:C:TgnfksBpPhF")) != -1)
+	while((c = getopt(argc, argv, "i:o:I:O:t:C:X:TgnfksBpPhF")) != -1)
 	{
 		switch(c)
 		{
@@ -298,6 +363,13 @@ main(int argc, char **argv)
 			break;
 		case 'C':
 			args.comment = optarg;
+			break;
+		case 'X':
+			if(handle_extended_arg(optarg, &args))
+			{
+				usage();
+				return 1;
+			}
 			break;
 		case 'h':
 			usage();

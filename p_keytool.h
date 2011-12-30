@@ -90,6 +90,7 @@ struct kt_args_s
 	unsigned long exponent;   
 	const char *comment;
 	time_t timestamp;
+	int nosign;
 };
 
 struct kt_pgpkeyid_s
