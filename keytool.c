@@ -128,7 +128,7 @@ init_input(BIO *file, kt_args *args, kt_key *k)
 			ERR_print_errors(args->berr);
 			return 1;
 		}
-		if(!stat(args->infile, &sbuf))
+		if(!args->kts_explicit && !stat(args->infile, &sbuf))
 		{
 			k->timestamp = MIN3(sbuf.st_mtime, sbuf.st_atime, sbuf.st_ctime);
 		}
@@ -181,6 +181,7 @@ usage(void)
 			"  -T                Alias for '-O text'\n"
 			"  -t TYPE           Set key type (required for -g)\n"
 			"  -g                Generate a new key (implies -P)\n"
+			"  -S YYYYMMDDHHMMSS Override key timestamp\n"
 			"  -f                Print the PKCS (SHA-1) key fingerprint\n"
 			"  -k                Print the PGP key ID\n"
 			"  -F                Print the PGP key fingerprint\n"
@@ -270,6 +271,64 @@ handle_extended_arg(const char *opt, kt_args *args)
 	return process_extended_opt(namebuf, value, args);
 }
 
+static int
+parse_timestamp(const char *ts, struct tm *tm)
+{
+	const char *p;
+	char tbuf[32];
+	size_t n;
+
+	p = ts;
+	memset(tm, 0, sizeof(struct tm));
+	for(n = 0; *ts; ts++)
+	{
+		if(!isdigit(*ts))
+		{
+			continue;
+		}
+		if(n + 1 >= sizeof(tbuf))
+		{
+			BIO_printf(bio_err, "%s: invalid timestamp '%s'\n", progname, p);
+			return -1;
+		}
+		tbuf[n] = *ts;
+		n++;
+	}
+	tbuf[n] = 0;
+	ts = NULL;
+	if(n == 14)
+	{		
+		ts = strptime(tbuf, "%Y%m%d%H%M%S", tm);
+	}	if(n == 12)
+	{
+		ts = strptime(tbuf, "%Y%m%d%H%M", tm);
+	}
+	else if(n == 10)
+	{
+		ts = strptime(tbuf, "%Y%m%d%H", tm);
+	}
+	else if(n == 8)
+	{
+		ts = strptime(tbuf, "%Y%m%d", tm);
+	}
+	else if(n == 6)
+	{
+		ts = strptime(tbuf, "%Y%m", tm);
+		tm->tm_mday = 1;
+	}
+	else if(n == 4)
+	{
+		ts = strptime(tbuf, "%Y", tm);
+		tm->tm_mday = 1;
+	}
+	if(!ts || ts[0])
+	{
+		BIO_printf(bio_err, "%s: invalid timestamp '%s'\n", progname, p);
+		return -1;		
+	}
+	return 0;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -280,6 +339,7 @@ main(int argc, char **argv)
 	kt_handler_entry *output_handler = NULL;
 	kt_handler_entry *input_handler = NULL;
 	int r, c;
+	struct tm tm;
 
 	if(argv[0] && argv[0][0])
 	{
@@ -301,24 +361,28 @@ main(int argc, char **argv)
 	args.berr = berr;
 	args.timestamp = time(NULL);
 	k.timestamp = args.timestamp;
-	while((c = getopt(argc, argv, "i:o:I:O:t:C:X:TgnfksBpPhF")) != -1)
+	while((c = getopt(argc, argv, "i:o:I:O:t:C:X:S:TgnfksBpPhF")) != -1)
 	{
 		switch(c)
 		{
 		case 'i':
+			/* -i FILE -- Specify input file */
 			args.infile = optarg;
 			break;
 		case 'o':
+			/* -i FILE -- Specify output file */
 			args.outfile = optarg;
 			break;
 		case 'I':
+			/* -I FORMAT -- Specify input format */
 			if(NULL == (input_handler = find_handler(optarg)))
 			{
 				BIO_printf(berr, "%s: Unknown input format '%s'\n", progname, optarg);
 				return 1;
 			}
 			break;
-		case 'O':			
+		case 'O':
+			/* -O FORMAT -- Specify output format */
 			if(NULL == (output_handler = find_handler(optarg)))
 			{
 				BIO_printf(berr, "%s: Unknown output format '%s'\n", progname, optarg);
@@ -326,36 +390,46 @@ main(int argc, char **argv)
 			}
 			break;
 		case 'T':
+			/* -T -- Equivalent to -O text */
 			output_handler = find_handler("text");
 			break;
 		case 'f':
+			/* -f -- Output PKCS SHA-1 fingerprint */
 			args.sha1 = 1;
 			break;
 		case 'k':
+			/* -k -- Output PGP key ID */
 			args.pgpid = 1;
 			break;
 		case 's':
+			/* -s -- Output SSH MD5 fingerprint */
 			args.md5 = 1;
 			break;
 		case 'B':
+			/* -B -- Output SSH Bubblebabble digest */
 			args.bubble = 1;
 			break;
 		case 'F':
+			/* -F -- Output PGP key fingerprint */
 			args.pgpfp = 1;
 			break;
 		case 'p':
+			/* -p -- Attempt to read a private key */
 			args.readpriv = 1;
 			break;
 		case 'P':
+			/* -P -- Attempt to read and write a private key */
 			args.readpriv = 1;
 			args.writepriv = 1;
 			break;
 		case 'g':
+			/* -g -- Generate a new key */
 			args.generate = 1;
 			args.infile = NULL;
 			args.writepriv = 1;
 			break;
 		case 't':
+			/* -t TYPE -- Specify key type */
 			if(KT_ERROR == (k.type = kt_type(optarg)))
 			{
 				BIO_printf(berr, "%s: Unknown key type '%s'\n", progname, optarg);
@@ -363,17 +437,29 @@ main(int argc, char **argv)
 			}
 			break;
 		case 'n':
+			/* -n -- Inhibit output (doesn't apply to -f, -k, -F, -s and -B) */
 			args.noout = 1;
 			break;
 		case 'C':
+			/* -C COMMENT -- Set the SSH key comment/PGP user ID */
 			args.comment = optarg;
 			break;
 		case 'X':
+			/* -Xopt[=value] -- Extended options */
 			if(handle_extended_arg(optarg, &args))
 			{
 				usage();
 				return 1;
 			}
+			break;
+		case 'S':
+			/* -S YYYYMMDDHHMMSS -- Set key timestamp */
+			if(parse_timestamp(optarg, &tm))
+			{
+				return 1;
+			}
+			args.kts_explicit = 1;
+			k.timestamp = mktime(&tm);
 			break;
 		case 'h':
 			usage();

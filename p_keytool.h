@@ -17,9 +17,12 @@
 #ifndef P_KEYTOOL_H_
 # define P_KEYTOOL_H_                   1
 
+# define _XOPEN_SOURCE
+
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
+# include <ctype.h>
 # include <unistd.h>
 # include <inttypes.h>
 # include <time.h>
@@ -91,6 +94,8 @@ struct kt_args_s
 	const char *comment;
 	time_t timestamp;
 	int nosign;
+	int ts_explicit;
+	int kts_explicit;
 };
 
 struct kt_pgpkeyid_s
