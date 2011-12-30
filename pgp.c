@@ -289,7 +289,6 @@ pgp_write_key_material(BIO *bout, kt_key *key)
 		pgp_write_bn(bout, key->k.rsa->e);
 		break;
 	default:
-		BIO_printf(bio_err, "%s: PGP: Cannot write a public key packet for a %s key\n", progname, kt_type_printname(key->type));
 		return -1;
 	}
 	return 0;

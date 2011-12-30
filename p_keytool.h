@@ -161,4 +161,8 @@ extern int pgp_write_packet_header(BIO *bout, int tag, int length);
 extern int pgp_write_subpkt_header(BIO *bout, int tag, int length);
 extern int pgp_write_digest_signature(BIO *bout, int hash, kt_key *key, const unsigned char *digest, size_t digestlen);
 
+extern int rdfxml_output(kt_key *key, BIO *bout, kt_args *args);
+
+extern int turtle_output(kt_key *key, BIO *bout, kt_args *args);
+
 #endif /*!P_KEYTOOL_H_*/

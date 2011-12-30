@@ -48,6 +48,8 @@ static kt_handler_entry handlers[] =
 	{ "openssh", "OpenSSH", "OpenSSH key format", NULL, openssh_output },
 	{ "ssh2", "SSH-2", "SSH-2 (RFC4716) key format", NULL, ssh_output },
 	{ "pgp", "PGP", "OpenPGP (RFC4880) version 4 key format", NULL, pgp_output },
+	{ "rdfxml", "RDF/XML", "RDF/XML format", NULL, rdfxml_output },
+	{ "turtle", "Turtle", "RDF (Turtle) format", NULL, turtle_output },
 	{ NULL, NULL, NULL, NULL, NULL }
 };
 
