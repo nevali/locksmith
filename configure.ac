@@ -2,6 +2,13 @@ AC_INIT([keytool],[develop])
 AM_INIT_AUTOMAKE([foreign])
 AM_MAINTAINER_MODE
 
+developer_CPPFLAGS='-W -Wall -O0 -g'
+
+if test x"$VERSION" = x"develop" ; then
+   AC_MSG_RESULT([enabling developer-mode CPPFLAGS: $developer_CPPFLAGS])
+   CPPFLAGS="$CPPFLAGS $developer_CPPFLAGS"
+fi
+
 AC_PROG_CC
 
 PKG_CHECK_MODULES([libcrypto],[libcrypto >= 0.9.8],[
