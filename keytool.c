@@ -135,6 +135,10 @@ init_input(BIO *file, kt_args *args, kt_key *k)
 	}
 	else
 	{
+		if(isatty(0))
+		{
+			BIO_printf(args->berr, "%s: Reading from standard input (use -i to specify an input file, or -h for usage information)\n", progname);
+		}
 		args->infile = "*standard input*";
 		setvbuf(stdin, NULL, _IONBF, 0);
 		BIO_set_fp(file, stdin, BIO_NOCLOSE);
