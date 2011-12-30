@@ -8,7 +8,7 @@ Current status:
 	  '-t TYPE'. This is not required when reading public keys.
 
 	- Public keys can be written as PEM, DER, SSH-2, OpenSSH, plain text,
-	  PGP, RDF/XML and Turtle formats.
+	  PGP, RDF/XML and Turtle, DNSSEC DNSKEY, IPGP CERT, and PKA formats.
 
 	- Private keys can be written as PEM, DER or plain text.
 
