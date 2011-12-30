@@ -1,0 +1,32 @@
+Installing from git
+===================
+
+Installing from a git snapshot is almost identical to building and installing
+from an ordinary source tarball, except that you'll first need to generate
+'configure', 'Makefile.in' and 'config.h.in'.
+
+To do this, make sure you've initialised and updated submodules, and then
+invoke the following from the top-level source directory:
+
+$ buildtools/autogen
+>>> Generating files in /home/me/keytool
+ +> Generating aclocal.m4
+ +> Generating config.h.in
+ +> Generating Makefile.in from Makefile.am
+ +> Generating configure script
+$
+
+If you receive errors from the above command, you might need to set some
+environment variables to the names of the autotools utilities on your
+system; specifically, AUTOHEADER26, ACLOCAL110, AUTOMAKE110 and AUTOCONF26.
+Different operating systems and distributions use different names for these:
+for example, autoheader 2.6 could be named 'autoheader-2.6', 'gautoheader-2.6',
+'autoheader26' or even just 'autoheader'.
+
+If you create a file named .autogenrc in your home directory, it will be
+sourced by autogen when you invoke it, so you can set those variables there
+if you prefer.
+
+Once you've successfully generated a configure script, you can run it as
+normal to create a Makefile. If you modify Makefile.am at all, you'll
+need to re-run autogen.
