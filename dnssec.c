@@ -65,7 +65,10 @@ dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 		BIO_printf(args->berr, "%s: DNSSEC Unable to write a %s key\n", progname, kt_type_printname(key->type));
 		return -1;
 	}
-	
+	if(key->privkey && args->writepriv)
+	{
+		return dnssec_write_private(bout, key, alg);
+	}
 	BIO_printf(bout, ";; %d-bit %s zone key for %s\n", key->size, kt_type_printname(key->type), domain);
 	BIO_printf(bout, ";; K%s+%03d+%05d\n", domain, alg, 0);
 	mbio = BIO_new(BIO_s_mem());
@@ -115,5 +118,79 @@ dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 	return 0;
 }
 
+const char *
+dnssec_alg_printname(int alg)
+{
+	switch(alg)
+	{
+	case 1:
+		return "RSAMD5";
+	case 5:
+		return "RSASHA1";
+	}
+	return "Unknown";
+}
 
-		
+int
+dnssec_write_private(BIO *bout, kt_key *key, int alg)
+{
+	BIO_printf(bout, "Private-key-format: v1.2\n");
+	BIO_printf(bout, "Algorithm: %d (%s)\n", alg, dnssec_alg_printname(alg));
+	switch(key->type)
+	{
+	case KT_RSA:
+		dnssec_write_bn_base64(bout, "Modulus: ", key->k.rsa->n, "\n");
+		dnssec_write_bn_base64(bout, "PublicExponent: ", key->k.rsa->e, "\n");
+		dnssec_write_bn_base64(bout, "PrivateExponent: ", key->k.rsa->d, "\n");
+		dnssec_write_bn_base64(bout, "Prime1: ", key->k.rsa->p, "\n");
+		dnssec_write_bn_base64(bout, "Prime2: ", key->k.rsa->q, "\n");
+		dnssec_write_bn_base64(bout, "Exponent1: ", key->k.rsa->dmp1, "\n");
+		dnssec_write_bn_base64(bout, "Exponent2: ", key->k.rsa->dmq1, "\n");
+		dnssec_write_bn_base64(bout, "Coefficient: ", key->k.rsa->iqmp, "\n");
+		break;
+	default:
+		break;
+	}
+	return 0;
+}
+
+int
+dnssec_write_bn_base64(BIO *bout, const char *prefix, BIGNUM *num, const char *suffix)
+{
+	static unsigned char *buf = NULL;
+	static size_t bufsize = 0;
+	BIO *mbio, *b64;
+	BUF_MEM *ptr;
+	size_t l;
+	unsigned char *p;
+
+	l = BN_num_bytes(num);
+	if(l > bufsize)
+	{
+		p = (unsigned char *) realloc(buf, l);
+		if(!p)
+		{
+			return -1;
+		}
+		buf = p;
+	}
+	mbio = BIO_new(BIO_s_mem());
+	b64 = BIO_new(BIO_f_base64());
+	mbio = BIO_push(b64, mbio);
+	BIO_set_flags(mbio, BIO_FLAGS_BASE64_NO_NL);
+	BN_bn2bin(num, buf);
+	BIO_write(mbio, buf, l);
+	mbio = BIO_pop(mbio);
+	BIO_free(b64);
+	if(prefix)
+	{
+		BIO_write(bout, prefix, strlen(prefix));
+	}
+	BIO_get_mem_ptr(mbio, &ptr);
+	BIO_write(bout, ptr->data, ptr->length);
+	if(suffix)
+	{
+		BIO_write(bout, suffix, strlen(suffix));
+	}
+	return 0;
+}

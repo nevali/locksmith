@@ -167,5 +167,8 @@ extern int rdfxml_output(kt_key *key, BIO *bout, kt_args *args);
 extern int turtle_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int dnssec_output(kt_key *key, BIO *bout, kt_args *args);
+extern const char *dnssec_alg_printname(int alg);
+extern int dnssec_write_private(BIO *bout, kt_key *key, int alg);
+extern int dnssec_write_bn_base64(BIO *bout, const char *prefix, BIGNUM *num, const char *suffix);
 
 #endif /*!P_KEYTOOL_H_*/
