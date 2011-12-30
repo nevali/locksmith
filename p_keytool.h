@@ -23,12 +23,42 @@
 # include <stdlib.h>
 # include <string.h>
 # include <ctype.h>
-# include <unistd.h>
+
+# ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+# endif
+
+# ifdef HAVE_INTTYPES_H
 # include <inttypes.h>
-# include <time.h>
-# include <sys/types.h>
-# include <sys/stat.h>
-# include <unistd.h>
+# endif
+
+# ifdef HAVE_STDINT_H
+# include <stdint.h>
+# endif
+
+# ifdef TIME_WITH_SYS_TIME
+#  include <sys/time.h>
+#  include <time.h>
+# else
+#  ifdef HAVE_SYS_TIME_H
+#   include <sys/time.h>
+#  else
+#   include <time.h>
+#  endif
+# endif
+
+# ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+# endif
+
+# ifdef HAVE_SYS_STAT_H
+#  include <sys/stat.h>
+# endif
+
+# ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+# endif
+
 # include <openssl/err.h>
 # include <openssl/buffer.h>
 # include <openssl/bn.h>
