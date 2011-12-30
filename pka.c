@@ -26,7 +26,7 @@ pka_output(kt_key *key, BIO *bout, kt_args *args)
 {
 	const char *domain = "user._pka.example.com.";
 	const char *url = NULL;
-	size_t len, n;
+	size_t n;
 	const char *t;
 	BIO *nbio;
 	int r;
@@ -52,10 +52,6 @@ pka_output(kt_key *key, BIO *bout, kt_args *args)
 	{
 		BIO_printf(args->berr, "%s: PKA: Unable to determine fingerprint of key\n", progname);
 		return -1;
-	}
-	if(url && *url)
-	{
-		len += strlen(url);
 	}
 	BIO_printf(bout, "%s IN TXT \"v=pka1;fpr=", domain);
 	for(n = 0; n < key->keyid->fplen; n++)
