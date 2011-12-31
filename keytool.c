@@ -173,17 +173,9 @@ main(int argc, char **argv)
 			args.input_handler = kt_handler_locate("pem");
 		}
 	}
-	if(!args.noout)
+	if(!args.output_handler)
 	{
-		if(!args.output_handler)
-		{
-			args.output_handler = kt_handler_locate("pem");
-		}
-		if(!args.output_handler->output)
-		{
-			BIO_printf(berr, "%s: Keys cannot be written in %s format\n", progname, args.output_handler->printname);
-			return 1;
-		}
+		args.output_handler = kt_handler_locate("pem");
 	}
 	if(NULL == (bout = BIO_new(BIO_s_file())))
 	{
@@ -210,20 +202,31 @@ main(int argc, char **argv)
 	{
 		k.size = kt_get_size(&k);
 	}
-	if(args.md5)
+	if(args.fingerprint)
 	{
-		ssh_fingerprint(&k, bout, &args);
+		if(!args.output_handler->fingerprint)
+		{
+			BIO_printf(berr, "%s: Unable to produce %s fingerprints\n", progname, args.output_handler->printname);
+			return -1;
+		}
+		args.output_handler->fingerprint(&k, bout, &args);
 	}
-	if(args.pgpid)
+	if(args.keyid)
 	{
-		pgp_keyid(&k, bout, &args);
-	}
-	if(args.pgpfp)
-	{
-		pgp_fingerprint(&k, bout, &args);
+		if(!args.output_handler->keyid)
+		{
+			BIO_printf(berr, "%s: Unable to produce %s key IDs\n", progname, args.output_handler->printname);
+			return -1;
+		}
+		args.output_handler->keyid(&k, bout, &args);
 	}
 	if(!args.noout)
 	{
+		if(!args.output_handler->output)
+		{
+			BIO_printf(berr, "%s: Keys cannot be written in %s format\n", progname, args.output_handler->printname);
+			return 1;
+		}
 		if((r = args.output_handler->output(&k, bout, &args)))
 		{
 			return (r < 0 ? 1 : r);

@@ -44,7 +44,7 @@ kt_process_args(int argc, char **argv, kt_args *args, kt_key *key)
 			progname = argv[0];
 		}
 	}
-	while((c = getopt(argc, argv, "i:o:I:O:t:C:X:S:TgnfksBpPhF")) != -1)
+	while((c = getopt(argc, argv, "i:o:I:O:t:C:X:S:TgnfkpPh")) != -1)
 	{
 		switch(c)
 		{
@@ -77,24 +77,12 @@ kt_process_args(int argc, char **argv, kt_args *args, kt_key *key)
 			args->output_handler = kt_handler_locate("text");
 			break;
 		case 'f':
-			/* -f -- Output PKCS SHA-1 fingerprint */
-			args->sha1 = 1;
+			/* -f -- Output the fingerprint */
+			args->fingerprint = 1;
 			break;
 		case 'k':
-			/* -k -- Output PGP key ID */
-			args->pgpid = 1;
-			break;
-		case 's':
-			/* -s -- Output SSH MD5 fingerprint */
-			args->md5 = 1;
-			break;
-		case 'B':
-			/* -B -- Output SSH Bubblebabble digest */
-			args->bubble = 1;
-			break;
-		case 'F':
-			/* -F -- Output PGP key fingerprint */
-			args->pgpfp = 1;
+			/* -k -- Output key ID */
+			args->keyid = 1;
 			break;
 		case 'p':
 			/* -p -- Attempt to read a private key */
@@ -313,11 +301,8 @@ usage(void)
 			"  -t TYPE           Set key type (required for -g)\n"
 			"  -g                Generate a new key (implies -P)\n"
 			"  -S YYYYMMDDHHMMSS Override key timestamp\n"
-			"  -f                Print the PKCS (SHA-1) key fingerprint\n"
-			"  -k                Print the PGP key ID\n"
-			"  -F                Print the PGP key fingerprint\n"
-			"  -s                Print the SSH (MD5) key fingerprint\n"
-			"  -B                Print the SSH bubblebabble key digest\n"
+			"  -f                Print the key fingerprint\n"
+			"  -k                Print the key ID\n"
 			"  -p                Read a private key\n"
 			"  -P                Write the private key (implies -p)\n"
 			"  -C COMMENT        Key comment (SSH)/user ID (PGP)\n"

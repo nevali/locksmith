@@ -115,11 +115,8 @@ struct kt_args_s
 	kt_handler_entry *input_handler;
 	kt_handler_entry *output_handler;
 	int noout;
-	int sha1;
-	int pgpid;
-	int pgpfp;
-	int md5;
-	int bubble;
+	int keyid;
+	int fingerprint;
 	int readpriv;
 	int writepriv;
 	int generate;
@@ -142,6 +139,8 @@ struct kt_pgpkeyid_s
 
 typedef int (*kt_input_handler)(kt_key *key, BIO *bin, kt_args *args);
 typedef int (*kt_output_handler)(kt_key *key, BIO *bout, kt_args *args);
+typedef int (*kt_keyid_handler)(kt_key *key, BIO *bout, kt_args *args);
+typedef int (*kt_fingerprint_handler)(kt_key *key, BIO *bout, kt_args *args);
 
 struct kt_handler_entry_s
 {
@@ -150,6 +149,8 @@ struct kt_handler_entry_s
 	const char *desc;
 	kt_input_handler input;
 	kt_output_handler output;
+	kt_keyid_handler keyid;
+	kt_fingerprint_handler fingerprint;
 };
 
 struct kt_keytype_entry_s

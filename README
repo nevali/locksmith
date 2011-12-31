@@ -3,24 +3,36 @@ This is keytool, a utility for manipulating public and private keys.
 http://github.com/nevali/keytool
 
 Current status:
+	! Encrypted keys can't be read or written at the moment. NO CARE IS
+	! TAKEN to use a sensible RNG or secure memory when handling private
+	! keys.
+
 	- Keys can currently be read in PEM or DER formats. For DER private
 	  key input, you must explicitly specify the type of key using
 	  '-t TYPE'. This is not required when reading public keys.
 
-	- Public keys can be written as PEM, DER, SSH-2, OpenSSH, plain text,
+	- Public keys can be written in PEM, DER, SSH-2, OpenSSH, plain text,
 	  PGP, RDF/XML and Turtle, DNSSEC DNSKEY, IPGP CERT, and PKA formats.
 
-	- Private keys can be written as PEM, DER or plain text.
-
-	- Encrypted keys can't be read or written at the moment.
+	- Private keys can be written in PEM, DER, plain text and DNSSEC formats.
 
 	- The -C option can be used to specify a user ID when writing PGP keys.
 	  Using this requires a private key, because a user ID must be
 	  accompanied by a signature packet. Without -C, only a single PGP
 	  public key packet will be written.
 
-	- The -B (SSH bubblebabble digest) option is currently unimplemented.
-
-	- The -f (PKCS/SHA-1 fingerprint) option is currently unimplemented.
-
 	- DSA support is spotty (DSA keys cannot currently be generated).
+
+Examples:
+
+	Read an RSA private key in PEM format and emit a PGP public key with
+	a signed user ID. The PGP key timestamp will match the private key
+	file timestamp:
+
+	    $ keytool -i rsa-private.pem -o rsa-private.pgp -O pgp \
+	        -C 'Joe Bloggs <joe.bloggs@example.com>'
+
+	Read an RSA public key in PEM format and print just the SSH (MD5)
+	fingerprint:
+
+	    $ keytool -i rsa-public.pem -O ssh2 -f -n
