@@ -108,6 +108,7 @@ dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 	{
 		free(bp);
 	}
+	(void) BIO_flush(mbio);
 	mbio = BIO_pop(mbio);
 	BIO_free(b64);
 	BIO_get_mem_ptr(mbio, &ptr);
@@ -180,6 +181,7 @@ dnssec_write_bn_base64(BIO *bout, const char *prefix, BIGNUM *num, const char *s
 	BIO_set_flags(mbio, BIO_FLAGS_BASE64_NO_NL);
 	BN_bn2bin(num, buf);
 	BIO_write(mbio, buf, l);
+	(void) BIO_flush(mbio);
 	mbio = BIO_pop(mbio);
 	BIO_free(b64);
 	if(prefix)
