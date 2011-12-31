@@ -121,6 +121,12 @@ der_output(kt_key *k, BIO *bout, kt_args *args)
 			i2d_DSA_PUBKEY_bio(bout, k->k.dsa);
 		}
 		break;
+	case KT_DSAPARAM:
+		i2d_DSAparams_bio(bout, k->k.dsa);
+		break;
+	case KT_DHPARAM:
+		i2d_DHparams_bio(bout, k->k.dsa);
+		break;
 	default:
 		BIO_printf(args->berr, "%s: DER: unable to write a %s key in DER format\n", progname, kt_type_printname(k->type));
 		return 1;

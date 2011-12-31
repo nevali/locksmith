@@ -24,6 +24,7 @@ static kt_keytype_entry keytypes[] =
 {
 	{ "rsa", "RSA", "Rivest, Shamir, Adleman (RSA)", KT_RSA },
 	{ "dsa", "DSA", "Digital Signature Algorithm (DSA)", KT_DSA },
+	{ "dsaparam", "DSA parameters", "DSA key-generation parameters", KT_DSAPARAM },
 	{ NULL, NULL, NULL, KT_ERROR }
 };
 

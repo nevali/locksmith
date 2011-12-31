@@ -110,15 +110,23 @@ pem_output(kt_key *k, BIO *bout, kt_args *args)
 	pem_password_cb *callback = NULL;
 	void *cbdata = NULL;
 
-	pkey = EVP_PKEY_new();
+	pkey = NULL;
 	switch(k->type)
 	{
 	case KT_RSA:
+		pkey = EVP_PKEY_new();
 		EVP_PKEY_assign(pkey, EVP_PKEY_RSA, (char *) (k->k.rsa));
 		break;
 	case KT_DSA:
+		pkey = EVP_PKEY_new();
 		EVP_PKEY_assign(pkey, EVP_PKEY_DSA, (char *) (k->k.dsa));
 		break;
+	case KT_DSAPARAM:
+		PEM_write_bio_DSAparams(bout, k->k.dsa);
+		return 0;
+	case KT_DHPARAM:
+		PEM_write_bio_DHparams(bout, k->k.dsa);
+		return 0;
 	default:
 		BIO_printf(args->berr, "PEM: unable to write a %s key in PEM format\n", kt_type_printname(k->type));
 		return 1;

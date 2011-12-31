@@ -25,6 +25,7 @@ int
 kt_generate(kt_key *key, kt_args *args)
 {
 	RSA *rsa;
+	DSA *dsa;
 	BIGNUM *exponent;
 	BN_GENCB *gencb = NULL;
 
@@ -33,7 +34,7 @@ kt_generate(kt_key *key, kt_args *args)
 	switch(key->type)
 	{
 	case KT_RSA:
-		if(!args->bits)
+		if(args->bits <= 0)
 		{
 			args->bits = 2048;
 		}
@@ -43,7 +44,7 @@ kt_generate(kt_key *key, kt_args *args)
 		}
 		rsa = RSA_new();
 		exponent = BN_new();
-		BIO_printf(args->berr, "generate: Generating a new RSA private key with a %d-bit modulus\n", args->bits);
+		BIO_printf(args->berr, "%s: Generating a new RSA private key with a %d-bit modulus\n", progname, args->bits);
 		if(!BN_set_word(exponent, args->exponent))
 		{
 			ERR_print_errors(args->berr);
@@ -56,8 +57,22 @@ kt_generate(kt_key *key, kt_args *args)
 		}
 		key->k.rsa = rsa;
 		break;
+	case KT_DSAPARAM:
+		if(args->bits <= 0)
+		{
+			args->bits = 2048;
+		}
+		dsa = DSA_new();
+		BIO_printf(args->berr, "%s: Generating new %d-bit DSA key parameters\n", progname, args->bits);
+		if(!DSA_generate_parameters_ex(dsa, args->bits, NULL, 0, NULL, NULL, gencb))
+		{
+			ERR_print_errors(args->berr);
+			return 1;
+		}
+		key->k.dsa = dsa;
+		break;
 	default:
-		BIO_printf(args->berr, "generate: Unable to generate a new %s key\n", kt_type_printname(key->type));
+		BIO_printf(args->berr, "%s: Unable to generate a new %s key\n", progname, kt_type_printname(key->type));
 		return 1;
 	}
 	return 0;

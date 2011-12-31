@@ -171,6 +171,18 @@ process_extended_opt(const char *name, const char *value, kt_args *args)
 			r = 3;
 		}
 	}
+	else if(!strcmp(name, "bits"))
+	{
+		if(*value)
+		{
+			args->bits = atoi(value);
+			r = 0;
+		}
+		else
+		{
+			r = 3;
+		}
+	}
 	switch(r)
 	{
 	case -1:
@@ -308,6 +320,10 @@ usage(void)
 			"  -C COMMENT        Key comment (SSH)/user ID (PGP)\n"
 			"  -Xopt[=value]     Format-specific options (see below)\n"
 			"\n", progname);
+
+	fprintf(stderr, "Key generation options:\n"
+			"  -Xbits=NUM        Generate a key NUM bits in size\n"
+			"\n");
 	
 	fprintf(stderr, "PGP-specific options:\n"
 			"  -Xunsigned        Emit an unsigned user ID (requires -C)\n"

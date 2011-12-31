@@ -106,6 +106,7 @@ struct kt_key_s
 	{
 		RSA *rsa;
 		DSA *dsa;
+		DH *dh;
 	} k;
 	kt_pgpkeyid *keyid;
 };
