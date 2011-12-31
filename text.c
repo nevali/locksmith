@@ -35,6 +35,14 @@ text_output(kt_key *key, BIO *bout, kt_args *args)
 		fprintf(stderr, "DSA %s key\n", (key->privkey ? "private" : "public"));
 		DSA_print(bout, key->k.dsa, 0);
 		break;
+	case KT_DSAPARAM:
+		fprintf(stderr, "DSA parameters\n");
+		DSAparams_print(bout, key->k.dsa);
+		break;
+	case KT_DHPARAM:
+		fprintf(stderr, "DH parameters\n");
+		DSAparams_print(bout, key->k.dsa);
+		break;
 	default:
 		fprintf(stderr, "text: Unable to print a %s key\n", kt_type_printname(key->type));
 		return 1;
