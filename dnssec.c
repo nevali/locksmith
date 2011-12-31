@@ -20,20 +20,31 @@
 
 #include "p_keytool.h"
 
+/* http://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xml */
+#define DNSSEC_ALG_RESERVED             0
+#define DNSSEC_ALG_RSAMD5               1
+#define DNSSEC_ALG_DH                   2
+#define DNSSEC_ALG_DSA                  3
+#define DNSSEC_ALG_ECC                  4
+#define DNSSEC_ALG_RSASHA1              5
+#define DNSSEC_ALG_DSA_NSEC3_SHA1       6
+#define DNSSEC_ALG_RSASHA1_NSEC3_SHA1   7
+#define DNSSEC_ALG_RSASHA256            8
+#define DNSSEC_ALG_RSASHA512            10
+#define DNSSEC_ALG_ECC_GOST             12
+#define DNSSEC_ALG_INDIRECT             252
+#define DNSSEC_ALG_PRIVATEDNS           253
+#define DNSSEC_ALG_PRIVATEOID           254
+
 int
 dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 {
-	BIO *mbio, *b64;
-	BUF_MEM *ptr;
 	const char *domain = "example.com.";
 	const char *t;
 	int version = 3;
 	int flags = 256;
-	int hash = NID_sha1;
+	int hash = NID_undef;
 	int alg;
-	size_t l;
-	unsigned char buf[4];
-	unsigned char *bp;
 
 	if(args->domain && args->domain[0])
 	{
@@ -51,13 +62,40 @@ dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 		switch(hash)
 		{
 		case NID_md5:
-			alg = 1;
+			alg = DNSSEC_ALG_RSAMD5;
 			break;
 		case NID_sha1:
-			alg = 5;
+			alg = DNSSEC_ALG_RSASHA1;
+			break;
+		case NID_sha256:
+			alg = DNSSEC_ALG_RSASHA256;
+			break;
+		case NID_sha512:
+			alg = DNSSEC_ALG_RSASHA512;
+			break;
+		case NID_undef:
+			/* Default to RSA/SHA-1 */
+			hash = NID_sha1;
+			alg = DNSSEC_ALG_RSASHA1;
 			break;
 		default:
 			BIO_printf(args->berr, "%s: DNSSEC: Algorithm %d is not supported with RSA keys for DNSSEC output\n", progname, hash);
+			return -1;
+		}
+		break;
+	case KT_DSA:
+		switch(hash)
+		{
+		case NID_sha1:
+			alg = DNSSEC_ALG_DSA;
+			break;
+		case NID_undef:
+			/* Default to DSA/SHA1 */
+			hash = NID_sha1;
+			alg = DNSSEC_ALG_DSA;
+			break;
+		default:
+			BIO_printf(args->berr, "%s: DNSSEC: Algorithm %d is not supported with DSA keys for DNSSEC output\n", progname, hash);
 			return -1;
 		}
 		break;
@@ -69,13 +107,62 @@ dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 	{
 		return dnssec_write_private(bout, key, alg);
 	}
-	BIO_printf(bout, ";; %d-bit %s zone key for %s\n", key->size, kt_type_printname(key->type), domain);
+	return dnssec_write_public(bout, key, alg, domain, flags, version);
+}
+
+const char *
+dnssec_alg_printname(int alg)
+{
+	switch(alg)
+	{
+	case DNSSEC_ALG_RSAMD5:
+		return "RSAMD5";
+	case DNSSEC_ALG_DH:
+		return "DH";
+	case DNSSEC_ALG_DSA:
+		return "DSA";
+	case DNSSEC_ALG_ECC:
+		return "ECC";
+	case DNSSEC_ALG_RSASHA1:
+		return "RSASHA1";
+	case DNSSEC_ALG_DSA_NSEC3_SHA1:
+		return "DSA-NSEC3-SHA1";
+	case DNSSEC_ALG_RSASHA1_NSEC3_SHA1:
+		return "RSASHA1-NSEC3-SHA1";
+	case DNSSEC_ALG_RSASHA256:
+		return "RSASHA256";
+	case DNSSEC_ALG_RSASHA512:
+		return "RSASHA512";
+	case DNSSEC_ALG_ECC_GOST:
+		return "ECC-GOST";
+	case DNSSEC_ALG_INDIRECT:
+		return "INDIRECT";
+	case DNSSEC_ALG_PRIVATEDNS:
+		return "PRIVATEDNS";
+	case DNSSEC_ALG_PRIVATEOID:
+		return "PRIVATEOID";
+	}
+	return "Unknown";
+}
+
+int
+dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version)
+{
+	BIO *mbio, *b64;
+	BUF_MEM *ptr;
+	size_t l, t;
+	unsigned char buf[4];
+	unsigned char *bp;
+	int r;
+
+	BIO_printf(bout, ";; %d-bit %s zone key for %s\n", key->size, dnssec_alg_printname(alg), domain);
 	BIO_printf(bout, ";; K%s+%03d+%05d\n", domain, alg, 0);
 	mbio = BIO_new(BIO_s_mem());
 	b64 = BIO_new(BIO_f_base64());
 	mbio = BIO_push(b64, mbio);
 	BIO_set_flags(mbio, BIO_FLAGS_BASE64_NO_NL);
 	bp = NULL;
+	r = 0;
 	switch(key->type)
 	{
 	case KT_RSA:
@@ -101,6 +188,29 @@ dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 		l = BN_bn2bin(key->k.rsa->n, bp);
 		BIO_write(mbio, bp, l);
 		break;
+	case KT_DSA:
+		/* Calculate the T value, where 0 <= T <= 8
+		 * The size of G is is T * 8 + 64, so we can find the size of
+		 * G, subtract 64 and divide by 8 to obtain T.
+		 */
+		t = (BN_num_bytes(key->k.dsa->g) - 64) / 8;
+		if(t > 8)
+		{
+			BIO_printf(bio_err, "%s: DNSSEC: This DSA key is too large to be written as a DNSKEY record (t = %d)\n", progname, (int) t);
+			r = -1;
+		}
+		else
+		{
+			bp = (unsigned char *) malloc(t * 8 + 64);
+			/* Write T */
+			buf[0] = t;
+			BIO_write(mbio, buf, 1);
+			r |= dnssec_write_bn_fixed(mbio, key->k.dsa->q, bp, 20);
+			r |= dnssec_write_bn_fixed(mbio, key->k.dsa->p, bp, t * 8 + 64);
+			r |= dnssec_write_bn_fixed(mbio, key->k.dsa->g, bp, t * 8 + 64);
+			r |= dnssec_write_bn_fixed(mbio, key->k.dsa->pub_key, bp, t * 8 + 64);
+		}
+		break;
 	default:
 		break;
 	}
@@ -111,25 +221,38 @@ dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 	(void) BIO_flush(mbio);
 	mbio = BIO_pop(mbio);
 	BIO_free(b64);
-	BIO_get_mem_ptr(mbio, &ptr);
-	BIO_printf(bout, "%s IN DNSKEY %d %d %d ( ", domain, flags, version, alg);
-	BIO_write(bout, ptr->data, ptr->length);
-	BIO_write(bout, " )\n", 3);
+	if(r == 0)
+	{
+		BIO_get_mem_ptr(mbio, &ptr);
+		BIO_printf(bout, "%s IN DNSKEY %d %d %d ( ", domain, flags, version, alg);
+		BIO_write(bout, ptr->data, ptr->length);
+		BIO_write(bout, " )\n", 3);
+	}
 	BIO_free(mbio);
-	return 0;
+	return r;
 }
 
-const char *
-dnssec_alg_printname(int alg)
+int
+dnssec_write_bn_fixed(BIO *bout, BIGNUM *bn, unsigned char *buf, size_t nbytes)
 {
-	switch(alg)
+	size_t l;
+	unsigned char *bp;
+
+	l = BN_num_bytes(bn);
+	if(l > nbytes)
 	{
-	case 1:
-		return "RSAMD5";
-	case 5:
-		return "RSASHA1";
+		BIO_printf(bio_err, "%s: DNSSEC: Unable to fit key component in %d octets (%d octets required)\n", progname, (int) nbytes, (int) l);
+		return -1;
 	}
-	return "Unknown";
+	memset(buf, 0, nbytes);
+	bp = buf;
+	if(l < nbytes)
+	{
+		bp += nbytes - l;
+	}
+	BN_bn2bin(bn, bp);
+	BIO_write(bout, buf, nbytes);
+	return 0;
 }
 
 int
@@ -148,6 +271,13 @@ dnssec_write_private(BIO *bout, kt_key *key, int alg)
 		dnssec_write_bn_base64(bout, "Exponent1: ", key->k.rsa->dmp1, "\n");
 		dnssec_write_bn_base64(bout, "Exponent2: ", key->k.rsa->dmq1, "\n");
 		dnssec_write_bn_base64(bout, "Coefficient: ", key->k.rsa->iqmp, "\n");
+		break;
+	case KT_DSA:
+		dnssec_write_bn_base64(bout, "Prime(p): ", key->k.dsa->p, "\n");
+		dnssec_write_bn_base64(bout, "Subprime(q): ", key->k.dsa->q, "\n");
+		dnssec_write_bn_base64(bout, "Base(g): ", key->k.dsa->g, "\n");
+		dnssec_write_bn_base64(bout, "Private_value(x): ", key->k.dsa->priv_key, "\n");
+		dnssec_write_bn_base64(bout, "Public_value(y): ", key->k.dsa->pub_key, "\n");
 		break;
 	default:
 		break;
