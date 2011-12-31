@@ -80,6 +80,8 @@
 typedef struct kt_key_s kt_key;
 typedef struct kt_args_s kt_args;
 typedef struct kt_pgpkeyid_s kt_pgpkeyid;
+typedef struct kt_handler_entry_s kt_handler_entry;
+typedef struct kt_keytype_entry_s kt_keytype_entry;
 
 typedef enum
 {
@@ -110,6 +112,8 @@ struct kt_args_s
 	BIO *berr;
 	const char *infile;
 	const char *outfile;
+	kt_handler_entry *input_handler;
+	kt_handler_entry *output_handler;
 	int noout;
 	int sha1;
 	int pgpid;
@@ -139,10 +143,33 @@ struct kt_pgpkeyid_s
 typedef int (*kt_input_handler)(kt_key *key, BIO *bin, kt_args *args);
 typedef int (*kt_output_handler)(kt_key *key, BIO *bout, kt_args *args);
 
+struct kt_handler_entry_s
+{
+	const char *name;
+	const char *printname;
+	const char *desc;
+	kt_input_handler input;
+	kt_output_handler output;
+};
+
+struct kt_keytype_entry_s
+{
+	const char *name;
+	const char *printname;
+	const char *desc;
+	kt_keytype type;
+};
+
 extern const char *progname;
 extern BIO *bio_err;
 
-extern kt_keytype kt_type(const char *str);
+kt_handler_entry *kt_handlers(void);
+kt_handler_entry *kt_handler_locate(const char *name);
+
+extern int kt_process_args(int argc, char **argv, kt_args *args, kt_key *key);
+
+extern kt_keytype_entry *kt_types(void);
+extern kt_keytype kt_type_locate(const char *str);
 extern const char *kt_type_printname(kt_keytype type);
 
 extern int kt_generate(kt_key *key, kt_args *args);
@@ -198,8 +225,10 @@ extern int turtle_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int dnssec_output(kt_key *key, BIO *bout, kt_args *args);
 extern const char *dnssec_alg_printname(int alg);
+extern int dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version);
 extern int dnssec_write_private(BIO *bout, kt_key *key, int alg);
 extern int dnssec_write_bn_base64(BIO *bout, const char *prefix, BIGNUM *num, const char *suffix);
+extern int dnssec_write_bn_fixed(BIO *bout, BIGNUM *bn, unsigned char *buf, size_t nbytes);
 
 extern int cert_ipgp_output(kt_key *key, BIO *bout, kt_args *args);
 
