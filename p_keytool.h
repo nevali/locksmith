@@ -88,9 +88,12 @@ typedef enum
 	KT_ERROR = -1,
 	KT_UNKNOWN = 0,
 	KT_RSA,
+	KT_DSAPARAM,
 	KT_DSA,
 	KT_ELGAMAL,
-	KT_ECC
+	KT_ECC,
+	KT_DHPARAM,
+	KT_DH
 } kt_keytype;
 
 struct kt_key_s
