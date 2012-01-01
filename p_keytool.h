@@ -66,6 +66,7 @@
 # include <openssl/evp.h>
 # include <openssl/pem.h>
 # include <openssl/rsa.h>
+# include <openssl/dsa.h>
 # include <openssl/engine.h>
 # include <openssl/objects.h>
 # include <openssl/x509.h>

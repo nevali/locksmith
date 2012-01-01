@@ -463,6 +463,9 @@ pgp_write_sig_packet_body(BIO *bout, int sigtype, kt_key *key, BUF_MEM *target, 
 	case KT_RSA:
 		buf[0] = PGP_KT_RSA_SIGN_ENCRYPT;
 		break;
+	case KT_DSA:
+		buf[0] = PGP_KT_DSA;
+		break;
 	default:
 		return -1;
 	}
@@ -533,6 +536,7 @@ pgp_write_digest_signature(BIO *bout, int hash, kt_key *key, const unsigned char
 	unsigned char buf[2];
 	int r, siglen, sigbits, nid;
 	unsigned char *sigbuf;
+	DSA_SIG *sig;
 
 	r = -1;
 	sigbuf = NULL;
@@ -559,16 +563,32 @@ pgp_write_digest_signature(BIO *bout, int hash, kt_key *key, const unsigned char
 			ERR_print_errors_fp(stderr);
 		}
 		break;
+	case KT_DSA:
+		if((sig = DSA_do_sign(digest, digestlen, key->k.dsa)))
+		{
+			r = 0;
+			pgp_write_bn(bout, sig->r);
+			pgp_write_bn(bout, sig->s);
+			DSA_SIG_free(sig);
+		}
+		else
+		{
+			ERR_print_errors_fp(stderr);
+		}
+		break;
 	default:
 		BIO_printf(bio_err, "%s: PGP: Unable to produce a signature using a %s key\n", progname, kt_type_printname(key->type));
 	}
 	if(r == 0)
 	{
-		sigbits = siglen * 8;
-		buf[0] = (sigbits >> 8) & 0xff;
-		buf[1] = sigbits & 0xff;
-		BIO_write(bout, buf, 2);
-		BIO_write(bout, sigbuf, siglen);
+		if(sigbuf)
+		{
+			sigbits = siglen * 8;
+			buf[0] = (sigbits >> 8) & 0xff;
+			buf[1] = sigbits & 0xff;
+			BIO_write(bout, buf, 2);
+			BIO_write(bout, sigbuf, siglen);
+		}
 	}
 	free(sigbuf);
 	return r;
