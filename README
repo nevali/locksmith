@@ -14,7 +14,8 @@ Current status:
 	- Public keys can be written in PEM, DER, SSH-2, OpenSSH, plain text,
 	  PGP, RDF/XML and Turtle, DNSSEC DNSKEY, IPGP CERT, and PKA formats.
 
-	- Private keys can be written in PEM, DER, plain text and DNSSEC formats.
+	- Private keys can be written in PEM, DER, plain text, DNSSEC (BIND 9)
+      and PEM-encoded PKCS#8 formats.
 
 	- The -C option can be used to specify a user ID when writing PGP keys.
 	  Using this requires a private key, because a user ID must be
