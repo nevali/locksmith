@@ -32,40 +32,48 @@
 int
 ssh_fingerprint(kt_key *k, BIO *bout, kt_args *args)
 {
-	BIO *tmp, *md;
-	EVP_MD *digest;
 	unsigned char mdbuf[EVP_MAX_MD_SIZE];
-	size_t mdlen, i;
+	ssize_t mdlen, i;
 
-	(void) bout;
-
-	switch(k->type)
+	mdlen = ssh_calc_fp(k, EVP_md5(), mdbuf);
+	if(mdlen < 0)
 	{
-	case KT_RSA:
-	case KT_DSA:
-		break;
-	default:
 		BIO_printf(args->berr, "%s: SSH: unable to generate an SSH fingerprint for a %s key\n", progname, kt_type_printname(k->type));
-		return 1;
+		return mdlen;
 	}
-	/* Create a sink BIO for writing the digest material to */
-	tmp = BIO_new(BIO_s_null());
-	/* Create an MD5 filter BIO */
-	md = BIO_new(BIO_f_md());
-	BIO_set_md(md, EVP_md5());
-	/* Attach the filter to the sink */
-	tmp = BIO_push(md, tmp);
-	ssh_write_pubkey_bio(k, tmp);
-	BIO_get_md(md, &digest);
-	mdlen = BIO_gets(md, (char *) mdbuf, EVP_MAX_MD_SIZE);
 	BIO_printf(bout, "%d", k->size);
 	for(i = 0; i < mdlen; i++)
 	{
 		BIO_printf(bout, "%c%02x", (i ? ':' : ' '), mdbuf[i]);
 	}
 	BIO_printf(bout, " %s (%s)\n", (args->comment ? args->comment : args->infile), kt_type_printname(k->type));
-	BIO_free_all(tmp);
 	return 0;
+}
+
+ssize_t
+ssh_calc_fp(kt_key *key, const EVP_MD *md, unsigned char *buf)
+{
+	BIO *tmp, *mdbio;
+	EVP_MD *digest;
+	size_t mdlen;
+	int r;
+
+	/* Create a sink BIO for writing the digest material to */
+	tmp = BIO_new(BIO_s_null());
+	/* Create a digest filter BIO */
+	mdbio = BIO_new(BIO_f_md());
+	BIO_set_md(mdbio, md);
+	/* Attach the filter to the sink */
+	tmp = BIO_push(mdbio, tmp);
+	r = ssh_write_pubkey_bio(key, tmp);
+	BIO_get_md(mdbio, &digest);
+	mdlen = BIO_gets(mdbio, (char *) buf, EVP_MAX_MD_SIZE);
+	BIO_free_all(tmp);
+	if(r)
+	{
+		return r;
+	}
+	return mdlen;
 }
 
 int

@@ -199,6 +199,7 @@ extern int openssh_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int ssh_output(kt_key *pubkey, BIO *bout, kt_args *args);
 extern int ssh_fingerprint(kt_key *key, BIO *bout, kt_args *args);
+extern ssize_t ssh_calc_fp(kt_key *key, const EVP_MD *md, unsigned char *buf);
 extern int ssh_write_pubkey_bio(kt_key *pubkey, BIO *bout);
 extern int ssh_write_str(BIO *bout, const char *str);
 extern unsigned char *ssh_write_bn(BIO *bout, BIGNUM *num, unsigned char *buf, size_t *buflen);
