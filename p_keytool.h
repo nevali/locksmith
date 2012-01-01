@@ -133,6 +133,7 @@ struct kt_args_s
 	int ts_explicit;
 	int kts_explicit;
 	const char *domain;
+	int nsec3;
 };
 
 struct kt_pgpkeyid_s
@@ -180,6 +181,7 @@ extern const char *kt_type_printname(kt_keytype type);
 extern kt_keytype kt_type_from_evptype(int t);
 extern kt_keytype kt_type_from_evp(EVP_PKEY *pkey);
 extern const char *kt_evptype_printname(EVP_PKEY *pkey);
+extern const char *kt_hash_printname(int nid);
 
 extern int kt_generate(kt_key *key, kt_args *args);
 extern int kt_get_public(kt_key *key);
@@ -237,6 +239,7 @@ extern int turtle_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int dnssec_output(kt_key *key, BIO *bout, kt_args *args);
 extern int dnssec_keyid(kt_key *key, BIO *bout, kt_args *args);
+extern int dnssec_alg(kt_keytype keytype, int nid, int nsec3);
 extern const char *dnssec_alg_printname(int alg);
 extern int dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version);
 extern int dnssec_write_public_rdata(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version);

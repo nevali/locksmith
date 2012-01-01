@@ -215,3 +215,27 @@ kt_evptype_printname(EVP_PKEY *pkey)
 {
 	return kt_type_printname(kt_type_from_evp(pkey));
 }
+
+const char *
+kt_hash_printname(int nid)
+{
+	static char sbuf[64];
+	
+	switch(nid)
+	{
+	case NID_md5:
+		return "MD5";
+	case NID_sha1:
+		return "SHA1";
+	case NID_sha224:
+		return "SHA-224";
+	case NID_sha256:
+		return "SHA-256";
+	case NID_sha384:
+		return "SHA-384";
+	case NID_sha512:
+		return "SHA-512";
+	}
+	sprintf(sbuf, "Unknown hash algorithm %d", nid);
+	return sbuf;
+}

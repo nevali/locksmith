@@ -103,52 +103,75 @@ get_args(kt_key *key, kt_args *args, const char **domain, int *version, int *fla
 	{
 		BIO_printf(args->berr, "%s: DNSSEC: Domain name '%s' does not include a terminating period, which is probably not what you want\n", progname, *domain);
 	}
-	switch(key->type)
+	*alg = dnssec_alg(key->type, hash, args->nsec3);
+	if(*alg == -1)
+	{
+		return -1;
+	}
+	return 0;
+}
+
+int
+dnssec_alg(kt_keytype keytype, int hash, int nsec3)
+{
+	switch(keytype)
 	{
 	case KT_RSA:
+		if(nsec3)
+		{
+			if(hash == NID_sha1 || hash == NID_undef)
+			{
+				return DNSSEC_ALG_RSASHA1_NSEC3_SHA1;
+			}
+			BIO_printf(bio_err, "%s: DNSSEC: Algorithm %s does not have an NSEC3 variant usable with RSA keys\n", progname, kt_hash_printname(hash));
+			return -1;
+		}
 		switch(hash)
 		{
 		case NID_md5:
-			*alg = DNSSEC_ALG_RSAMD5;
+			return DNSSEC_ALG_RSAMD5;
 			break;
 		case NID_sha1:
-			*alg = DNSSEC_ALG_RSASHA1;
-			break;
+			return DNSSEC_ALG_RSASHA1;
 		case NID_sha256:
-			*alg = DNSSEC_ALG_RSASHA256;
-			break;
+			return DNSSEC_ALG_RSASHA256;
 		case NID_sha512:
-			*alg = DNSSEC_ALG_RSASHA512;
-			break;
+			return DNSSEC_ALG_RSASHA512;
 		case NID_undef:
 			/* Default to RSA/SHA-1 */
-			*alg = DNSSEC_ALG_RSASHA1;
-			break;
+			return DNSSEC_ALG_RSASHA1;
 		default:
-			BIO_printf(args->berr, "%s: DNSSEC: Algorithm %d is not supported with RSA keys for DNSSEC output\n", progname, hash);
+			BIO_printf(bio_err, "%s: DNSSEC: Algorithm %s is not supported with RSA keys for DNSSEC output\n", progname, kt_hash_printname(hash));
 			return -1;
 		}
 		break;
 	case KT_DSA:
+		if(nsec3)
+		{
+			if(hash == NID_sha1 || hash == NID_undef)
+			{
+				return DNSSEC_ALG_DSA_NSEC3_SHA1;
+			}
+			BIO_printf(bio_err, "%s: DNSSEC: Algorithm %s does not have an NSEC3 variant usable with DSA keys\n", progname, kt_hash_printname(hash));
+			return -1;
+		}
 		switch(hash)
 		{
 		case NID_sha1:
-			*alg = DNSSEC_ALG_DSA;
-			break;
+			return DNSSEC_ALG_DSA;
 		case NID_undef:
 			/* Default to DSA/SHA1 */
-			*alg = DNSSEC_ALG_DSA;
-			break;
+			return DNSSEC_ALG_DSA;
 		default:
-			BIO_printf(args->berr, "%s: DNSSEC: Algorithm %d is not supported with DSA keys for DNSSEC output\n", progname, hash);
+			BIO_printf(bio_err, "%s: DNSSEC: Algorithm %s is not supported with DSA keys for DNSSEC output\n", progname, kt_hash_printname(hash));
 			return -1;
 		}
 		break;
 	default:
-		BIO_printf(args->berr, "%s: DNSSEC Unable to write a %s key\n", progname, kt_type_printname(key->type));
-		return -1;
+		break;
 	}
-	return 0;
+	BIO_printf(bio_err, "%s: DNSSEC Unable to write a %s key\n", progname, kt_type_printname(keytype));
+	return -1;
 }
 
 const char *

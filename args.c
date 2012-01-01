@@ -157,8 +157,13 @@ process_extended_opt(const char *name, const char *value, kt_args *args)
 	if(!strcmp(name, "unsigned"))
 	{
 		r = (*value) ? 2 : 0;
-		args->nosign = 1;	   
+		args->nosign = 1;
 	}
+	else if(!strcmp(name, "nsec3"))
+	{
+		r = (*value) ? 2 : 0;
+		args->nsec3 = 1;
+	}		
 	else if(!strcmp(name, "domain"))
 	{
 		if(*value)
@@ -331,6 +336,7 @@ usage(void)
 
 	fprintf(stderr, "DNSSEC-specific options:\n"
 			"  -Xdomain=DOMAIN   Specify doman name for a zone key\n"
+			"  -Xnsec3           Write a key for NSEC3\n"
 			"\n");
 
 	handlers = kt_handlers();
