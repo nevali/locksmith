@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Mo McRoberts.
+ * Copyright 2011-2012 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 int
 der_input(kt_key *k, BIO *bin, kt_args *args)
 {
-	int r, t;
+	int r;
 	EVP_PKEY *pkey;
 	kt_keytype ktype;
 
@@ -69,29 +69,20 @@ der_input(kt_key *k, BIO *bin, kt_args *args)
 			ERR_print_errors(args->berr);
 			return -1;
 		}
-		t = EVP_PKEY_type(pkey->type);
-		switch(t)
+		ktype = k->type;
+		if(kt_key_from_evp(pkey, k))
 		{
-		case EVP_PKEY_RSA:
-			ktype = KT_RSA;
-			k->k.rsa = EVP_PKEY_get1_RSA(pkey);
-			break;
-		case EVP_PKEY_DSA:
-			ktype = KT_DSA;
-			k->k.dsa = EVP_PKEY_get1_DSA(pkey);
-			break;
-		default:
-			BIO_printf(args->berr, "%s: DER: unable to handle a %d key\n", progname, t);
-			return -1;
+			BIO_printf(args->berr, "%s: DER: unable to handle a %s key\n", progname, kt_evptype_printname(pkey));
+			EVP_PKEY_free(pkey);
+			return 1;
 		}
 		EVP_PKEY_assign(pkey, EVP_PKEY_NONE, NULL);
 		EVP_PKEY_free(pkey);
-		if(k->type != KT_UNKNOWN && k->type != ktype)
+		if(ktype != KT_UNKNOWN && k->type != ktype)
 		{
 			BIO_printf(args->berr, "%s: DER: expected a %s key, but read a %s key\n", progname, kt_type_printname(k->type), kt_type_printname(ktype));
 			return -1;
 		}
-		k->type = ktype;
 	}
 	return 0;
 }
@@ -125,7 +116,7 @@ der_output(kt_key *k, BIO *bout, kt_args *args)
 		i2d_DSAparams_bio(bout, k->k.dsa);
 		break;
 	case KT_DHPARAM:
-		i2d_DHparams_bio(bout, k->k.dsa);
+		i2d_DHparams_bio(bout, k->k.dh);
 		break;
 	default:
 		BIO_printf(args->berr, "%s: DER: unable to write a %s key in DER format\n", progname, kt_type_printname(k->type));

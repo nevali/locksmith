@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Mo McRoberts.
+ * Copyright 2011-2012 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ static kt_handler_entry handlers[] =
 	{ "dnssec", "DNSSEC", "DNSSEC key format", NULL, dnssec_output, NULL, NULL },
 	{ "ipgp", "CERT IPGP", "DNS CERT record (RFC4938) type 6 (indirect PGP)", NULL, cert_ipgp_output, NULL, NULL },
 	{ "pka", "PKA", "DNS PKA record", NULL, pka_output, NULL, NULL },
+	{ "pkcs8", "PKCS#8", "PEM-format PKCS#8 keypairs", NULL, pkcs8_output, NULL, NULL },
 	{ NULL, NULL, NULL, NULL, NULL, NULL, NULL }	
 };
 

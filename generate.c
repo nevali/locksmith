@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Mo McRoberts.
+ * Copyright 2011-2012 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -133,4 +133,85 @@ kt_get_size(kt_key *key)
 	default:
 		return 0;
 	}
+}
+
+EVP_PKEY *
+kt_key_to_evp(kt_key *k)
+{
+	EVP_PKEY *pkey;
+
+	switch(k->type)
+	{
+	case KT_RSA:
+		if((pkey = EVP_PKEY_new()))
+		{
+			EVP_PKEY_assign(pkey, EVP_PKEY_RSA, (char *) (k->k.rsa));
+		}
+		break;
+	case KT_DSA:
+		if((pkey = EVP_PKEY_new()))
+		{
+			EVP_PKEY_assign(pkey, EVP_PKEY_DSA, (char *) (k->k.dsa));
+		}
+		break;
+	default:
+		return NULL;
+	}
+	return pkey;
+}
+
+int
+kt_key_from_evp(EVP_PKEY *pkey, kt_key *k)
+{
+	int t;
+
+	t = EVP_PKEY_type(pkey->type);
+	switch(t)
+	{
+	case EVP_PKEY_RSA:
+		k->type = KT_RSA;
+		k->k.rsa = EVP_PKEY_get1_RSA(pkey);
+		break;
+	case EVP_PKEY_DSA:
+		k->type = KT_DSA;
+		k->k.dsa = EVP_PKEY_get1_DSA(pkey);
+		break;
+	default:
+		return -1;
+	}
+	return 0;
+}
+
+kt_keytype
+kt_type_from_evptype(int t)
+{
+	switch(t)
+	{
+	case EVP_PKEY_RSA:
+	case EVP_PKEY_RSA2:
+		return KT_RSA;
+	case EVP_PKEY_DSA:
+	case EVP_PKEY_DSA1:
+	case EVP_PKEY_DSA2:
+	case EVP_PKEY_DSA3:
+	case EVP_PKEY_DSA4:
+		return KT_DSA;
+	case EVP_PKEY_EC:
+		return KT_ECC;
+	case EVP_PKEY_DH:		
+		return KT_DH;
+	}
+	return KT_UNKNOWN;
+}
+
+kt_keytype
+kt_type_from_evp(EVP_PKEY *pkey)
+{
+	return kt_type_from_evptype(EVP_PKEY_type(pkey->type));
+}
+
+const char *
+kt_evptype_printname(EVP_PKEY *pkey)
+{
+	return kt_type_printname(kt_type_from_evp(pkey));
 }

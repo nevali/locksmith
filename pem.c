@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Mo McRoberts.
+ * Copyright 2011-2012 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 	pem_password_cb *callback = NULL;
 	void *cbdata = NULL;
 	unsigned long e;
-	int t;
 	kt_keytype ktype;
 
 	if(args->readpriv)
@@ -71,19 +70,11 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 			}
 		}
 	}
-	t = EVP_PKEY_type(pkey->type);
-	switch(t)
+	ktype = k->type;
+	if(kt_key_from_evp(pkey, k))
 	{
-	case EVP_PKEY_RSA:
-		ktype = KT_RSA;
-		k->k.rsa = EVP_PKEY_get1_RSA(pkey);
-		break;
-	case EVP_PKEY_DSA:
-		ktype = KT_DSA;
-		k->k.dsa = EVP_PKEY_get1_DSA(pkey);
-		break;
-	default:
-		BIO_printf(args->berr, "%s: PEM: unable to handle a %d key\n", progname, t);
+		BIO_printf(args->berr, "%s: PEM: unable to handle a %s key\n", progname, kt_evptype_printname(pkey));
+		EVP_PKEY_free(pkey);
 		return 1;
 	}
 	EVP_PKEY_assign(pkey, EVP_PKEY_NONE, NULL);
@@ -91,12 +82,11 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 	/* If an explicit type was requested, it's an error if the key read from
 	 * the PEM file is a different type.
 	 */
-	if(k->type != KT_UNKNOWN && k->type != ktype)
+	if(ktype != KT_UNKNOWN && k->type != ktype)
 	{
-		BIO_printf(args->berr, "%s: PEM: expected a %s key, but read a %s key\n", progname, kt_type_printname(k->type), kt_type_printname(ktype));
+		BIO_printf(args->berr, "%s: PEM: expected a %s key, but read a %s key\n", progname, kt_type_printname(ktype), kt_type_printname(k->type));
 		return 1;
 	}
-	k->type = ktype;
 	return 0;
 }
 
@@ -114,21 +104,21 @@ pem_output(kt_key *k, BIO *bout, kt_args *args)
 	switch(k->type)
 	{
 	case KT_RSA:
-		pkey = EVP_PKEY_new();
-		EVP_PKEY_assign(pkey, EVP_PKEY_RSA, (char *) (k->k.rsa));
-		break;
 	case KT_DSA:
-		pkey = EVP_PKEY_new();
-		EVP_PKEY_assign(pkey, EVP_PKEY_DSA, (char *) (k->k.dsa));
+		pkey = kt_key_to_evp(k);
 		break;
 	case KT_DSAPARAM:
 		PEM_write_bio_DSAparams(bout, k->k.dsa);
 		return 0;
 	case KT_DHPARAM:
-		PEM_write_bio_DHparams(bout, k->k.dsa);
+		PEM_write_bio_DHparams(bout, k->k.dh);
 		return 0;
 	default:
-		BIO_printf(args->berr, "PEM: unable to write a %s key in PEM format\n", kt_type_printname(k->type));
+		break;
+	}
+	if(!pkey)
+	{
+		BIO_printf(args->berr, "%s: PEM: unable to write a %s key in PEM format\n", progname, kt_type_printname(k->type));
 		return 1;
 	}
 	if(k->privkey && args->writepriv)

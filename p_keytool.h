@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Mo McRoberts.
+ * Copyright 2011-2012 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -176,10 +176,15 @@ extern int kt_process_args(int argc, char **argv, kt_args *args, kt_key *key);
 extern kt_keytype_entry *kt_types(void);
 extern kt_keytype kt_type_locate(const char *str);
 extern const char *kt_type_printname(kt_keytype type);
+extern kt_keytype kt_type_from_evptype(int t);
+extern kt_keytype kt_type_from_evp(EVP_PKEY *pkey);
+extern const char *kt_evptype_printname(EVP_PKEY *pkey);
 
 extern int kt_generate(kt_key *key, kt_args *args);
 extern int kt_get_public(kt_key *key);
 extern int kt_get_size(kt_key *key);
+extern EVP_PKEY *kt_key_to_evp(kt_key *key);
+extern int kt_key_from_evp(EVP_PKEY *pkey, kt_key *key);
 
 extern int text_output(kt_key *key, BIO *bout, kt_args *args);
 
@@ -238,5 +243,7 @@ extern int dnssec_write_bn_fixed(BIO *bout, BIGNUM *bn, unsigned char *buf, size
 extern int cert_ipgp_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int pka_output(kt_key *key, BIO *bout, kt_args *args);
+
+extern int pkcs8_output(kt_key *key, BIO *bout, kt_args *args);
 
 #endif /*!P_KEYTOOL_H_*/
