@@ -12,7 +12,8 @@ Current status:
 	  '-t TYPE'. This is not required when reading public keys.
 
 	- Public keys can be written in PEM, DER, SSH-2, OpenSSH, plain text,
-	  PGP, RDF/XML and Turtle, DNSSEC DNSKEY, IPGP CERT, and PKA formats.
+	  PGP, RDF/XML and Turtle, DNSSEC DNSKEY, IPGP CERT, PKA, and SSHFP
+	  formats.
 
 	- Private keys can be written in PEM, DER, plain text, DNSSEC (BIND 9)
       and PEM-encoded PKCS#8 formats.

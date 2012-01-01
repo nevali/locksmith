@@ -248,4 +248,6 @@ extern int pka_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int pkcs8_output(kt_key *key, BIO *bout, kt_args *args);
 
+extern int sshfp_output(kt_key *key, BIO *bout, kt_args *args);
+
 #endif /*!P_KEYTOOL_H_*/
