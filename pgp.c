@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Mo McRoberts.
+ * Copyright 2011-2012 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -41,6 +41,14 @@
 #define PGP_SIG_USERID_SELF_DEFAULT     PGP_SIG_USERID_POSITIVE
 
 #define PGP_KT_RSA_SIGN_ENCRYPT         0x01
+#define PGP_KT_RSA_ENCRYPT              0x02
+#define PGP_KT_RSA_SIGN                 0x03
+#define PGP_KT_ELGAMAL_ENCRYPT          0x10
+#define PGP_KT_DSA                      0x11
+#define PGP_KT_EC                       0x12
+#define PGP_KT_ECDSA                    0x13
+#define PGP_KT_ELGAMAL_ENCRYPT_SIGN     0x14
+#define PGP_KT_DH                       0x15
 
 #define PGP_ST_3DES                     0x02
 #define PGP_ST_CAST5                    0x03
@@ -287,6 +295,15 @@ pgp_write_key_material(BIO *bout, kt_key *key)
 		BIO_write(bout, buf, 1);
 		pgp_write_bn(bout, key->k.rsa->n);
 		pgp_write_bn(bout, key->k.rsa->e);
+		break;
+	case KT_DSA:
+		/* 0x11 = DSA */
+		buf[0] = PGP_KT_DSA;
+		BIO_write(bout, buf, 1);
+		pgp_write_bn(bout, key->k.dsa->p);
+		pgp_write_bn(bout, key->k.dsa->q);
+		pgp_write_bn(bout, key->k.dsa->g);
+		pgp_write_bn(bout, key->k.dsa->pub_key);
 		break;
 	default:
 		return -1;
