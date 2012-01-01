@@ -1,4 +1,4 @@
-AC_INIT([keytool],[develop])
+AC_INIT([keytool],[0.0.0])
 AM_INIT_AUTOMAKE([foreign])
 AM_MAINTAINER_MODE
 
