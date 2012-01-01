@@ -238,9 +238,11 @@ extern int turtle_output(kt_key *key, BIO *bout, kt_args *args);
 extern int dnssec_output(kt_key *key, BIO *bout, kt_args *args);
 extern const char *dnssec_alg_printname(int alg);
 extern int dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version);
+extern int dnssec_write_public_rdata(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version);
 extern int dnssec_write_private(BIO *bout, kt_key *key, int alg);
 extern int dnssec_write_bn_base64(BIO *bout, const char *prefix, BIGNUM *num, const char *suffix);
 extern int dnssec_write_bn_fixed(BIO *bout, BIGNUM *bn, unsigned char *buf, size_t nbytes);
+extern unsigned int dnssec_keytag(unsigned char *key, size_t keysize, int alg);
 
 extern int cert_ipgp_output(kt_key *key, BIO *bout, kt_args *args);
 

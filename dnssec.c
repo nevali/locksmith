@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Mo McRoberts.
+ * Copyright 2011-2012 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -148,19 +148,75 @@ dnssec_alg_printname(int alg)
 int
 dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version)
 {
-	BIO *mbio, *b64;
+	BIO *mem, *mbio, *b64;
 	BUF_MEM *ptr;
-	size_t l, t;
-	unsigned char buf[4];
-	unsigned char *bp;
 	int r;
+	unsigned int tag;
+
+	mem = BIO_new(BIO_s_mem());
+	r = dnssec_write_public_rdata(mem, key, alg, domain, flags, version);
+	if(r)
+	{
+		BIO_free(mem);
+		return r;
+	}
+	BIO_get_mem_ptr(mem, &ptr);	
+	tag = dnssec_keytag(ptr->data, ptr->length, alg);	
 
 	BIO_printf(bout, ";; %d-bit %s zone key for %s\n", key->size, dnssec_alg_printname(alg), domain);
-	BIO_printf(bout, ";; K%s+%03d+%05d\n", domain, alg, 0);
+	BIO_printf(bout, ";; K%s+%03d+%05u\n", domain, alg, tag);
+
 	mbio = BIO_new(BIO_s_mem());
 	b64 = BIO_new(BIO_f_base64());
 	mbio = BIO_push(b64, mbio);
 	BIO_set_flags(mbio, BIO_FLAGS_BASE64_NO_NL);
+	/* The first four bytes are flags, version, alg (which we already have) */
+	BIO_write(mbio, ptr->data + 4, ptr->length - 4);
+	BIO_free(mem);
+	(void) BIO_flush(mbio);
+	mbio = BIO_pop(mbio);
+	BIO_free(b64);
+
+	BIO_get_mem_ptr(mbio, &ptr);
+	BIO_printf(bout, "%s IN DNSKEY %d %d %d ( ", domain, flags, version, alg);
+	BIO_write(bout, ptr->data, ptr->length);
+	BIO_write(bout, " )\n", 3);
+	BIO_free(mbio);
+	return r;
+}
+
+unsigned int
+dnssec_keytag(unsigned char *key, size_t keysize, int alg)
+{
+	unsigned long ac;
+	size_t i;
+
+	if(alg == DNSSEC_ALG_RSAMD5)
+	{
+		/* RFC4043 Appendix B.1 */
+		return 0;
+	}
+	for(ac = 0, i = 0; i < keysize; i++)
+	{
+		ac += (i & 1) ? key[i] : key[i] << 8;
+	}
+	ac += (ac >> 16) & 0xFFFF;
+	return ac & 0xFFFF;
+}
+
+int
+dnssec_write_public_rdata(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version)
+{
+	int r;
+	size_t l, t;
+	unsigned char buf[4];
+	unsigned char *bp;
+
+	buf[0] = (flags >> 8) & 0xff;
+	buf[1] = flags & 0xff;
+	buf[2] = version;
+	buf[3] = alg;
+	BIO_write(bout, buf, 4);
 	bp = NULL;
 	r = 0;
 	switch(key->type)
@@ -171,22 +227,22 @@ dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int fla
 		if(l < 255)
 		{
 			buf[0] = l;
-			BIO_write(mbio, buf, 1);
+			BIO_write(bout, buf, 1);
 		}
 		else
 		{
 			buf[0] = 0;
 			buf[1] = (l >> 8) & 0xff;
 			buf[2] = l & 0xff;
-			BIO_write(mbio, buf, 3);
+			BIO_write(bout, buf, 3);
 		}
 		/* Write the exponent */
 		bp = (unsigned char *) malloc((BN_num_bytes(key->k.rsa->n)));
 		BN_bn2bin(key->k.rsa->e, bp);
-		BIO_write(mbio, bp, l);
+		BIO_write(bout, bp, l);
 		/* Write the modulus */
 		l = BN_bn2bin(key->k.rsa->n, bp);
-		BIO_write(mbio, bp, l);
+		BIO_write(bout, bp, l);
 		break;
 	case KT_DSA:
 		/* Calculate the T value, where 0 <= T <= 8
@@ -204,11 +260,11 @@ dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int fla
 			bp = (unsigned char *) malloc(t * 8 + 64);
 			/* Write T */
 			buf[0] = t;
-			BIO_write(mbio, buf, 1);
-			r |= dnssec_write_bn_fixed(mbio, key->k.dsa->q, bp, 20);
-			r |= dnssec_write_bn_fixed(mbio, key->k.dsa->p, bp, t * 8 + 64);
-			r |= dnssec_write_bn_fixed(mbio, key->k.dsa->g, bp, t * 8 + 64);
-			r |= dnssec_write_bn_fixed(mbio, key->k.dsa->pub_key, bp, t * 8 + 64);
+			BIO_write(bout, buf, 1);
+			r |= dnssec_write_bn_fixed(bout, key->k.dsa->q, bp, 20);
+			r |= dnssec_write_bn_fixed(bout, key->k.dsa->p, bp, t * 8 + 64);
+			r |= dnssec_write_bn_fixed(bout, key->k.dsa->g, bp, t * 8 + 64);
+			r |= dnssec_write_bn_fixed(bout, key->k.dsa->pub_key, bp, t * 8 + 64);
 		}
 		break;
 	default:
@@ -218,17 +274,6 @@ dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int fla
 	{
 		free(bp);
 	}
-	(void) BIO_flush(mbio);
-	mbio = BIO_pop(mbio);
-	BIO_free(b64);
-	if(r == 0)
-	{
-		BIO_get_mem_ptr(mbio, &ptr);
-		BIO_printf(bout, "%s IN DNSKEY %d %d %d ( ", domain, flags, version, alg);
-		BIO_write(bout, ptr->data, ptr->length);
-		BIO_write(bout, " )\n", 3);
-	}
-	BIO_free(mbio);
 	return r;
 }
 
