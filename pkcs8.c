@@ -21,13 +21,44 @@
 #include "p_keytool.h"
 
 /* Read keypairs in PKCS#8 [RFC5208] format */
-/*
+
 int
 pkcs8_input(kt_key *k, BIO *bin, kt_args *args)
 {
-	
+	EVP_PKEY *pkey;
+	PKCS8_PRIV_KEY_INFO *p8inf;
+	int ktype;
+
+	if(!(p8inf = PEM_read_bio_PKCS8_PRIV_KEY_INFO(bin, NULL, NULL, NULL)))
+	{
+		ERR_print_errors(args->berr);
+		return 1;
+	}	
+	if(!(pkey = EVP_PKCS82PKEY(p8inf)))
+	{
+		ERR_print_errors(args->berr);
+		return 1;
+	}
+	ktype = k->type;
+	if(kt_key_from_evp(pkey, k))
+	{
+		BIO_printf(args->berr, "%s: PKCS#8: unable to handle a %s key\n", progname, kt_evptype_printname(pkey));
+		EVP_PKEY_free(pkey);
+		return 1;
+	}
+	EVP_PKEY_assign(pkey, EVP_PKEY_NONE, NULL);
+	EVP_PKEY_free(pkey);
+	/* If an explicit type was requested, it's an error if the key read from
+	 * the PEM file is a different type.
+	 */
+	if(ktype != KT_UNKNOWN && k->type != ktype)
+	{
+		BIO_printf(args->berr, "%s: PKCS#8: expected a %s key, but read a %s key\n", progname, kt_type_printname(ktype), kt_type_printname(k->type));
+		return 1;
+	}	
+	return 0;
 }
-*/
+
 
 int
 pkcs8_output(kt_key *k, BIO *bout, kt_args *args)

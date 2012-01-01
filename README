@@ -7,9 +7,10 @@ Current status:
 	! TAKEN to use a sensible RNG or secure memory when handling private
 	! keys.
 
-	- Keys can currently be read in PEM or DER formats. For DER private
-	  key input, you must explicitly specify the type of key using
-	  '-t TYPE'. This is not required when reading public keys.
+	- Keys can currently be read in PEM, DER or PEM-encoded PKCS#8
+	  formats. For DER private key input, you must explicitly specify
+	  the type of key using '-t TYPE'. This is not required when
+	  reading public keys.
 
 	- Public keys can be written in PEM, DER, SSH-2, OpenSSH, plain text,
 	  PGP, RDF/XML and Turtle, DNSSEC DNSKEY, IPGP CERT, PKA, and SSHFP

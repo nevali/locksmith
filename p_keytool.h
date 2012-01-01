@@ -252,6 +252,7 @@ extern int cert_ipgp_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int pka_output(kt_key *key, BIO *bout, kt_args *args);
 
+extern int pkcs8_input(kt_key *key, BIO *bout, kt_args *args);
 extern int pkcs8_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int sshfp_output(kt_key *key, BIO *bout, kt_args *args);
