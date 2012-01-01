@@ -36,25 +36,72 @@
 #define DNSSEC_ALG_PRIVATEDNS           253
 #define DNSSEC_ALG_PRIVATEOID           254
 
+static int get_args(kt_key *key, kt_args *args, const char **domain, int *version, int *flags, int *alg);
+
 int
 dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 {
 	const char *domain = "example.com.";
-	const char *t;
 	int version = 3;
 	int flags = 256;
-	int hash = NID_undef;
 	int alg;
+
+	if(get_args(key, args, &domain, &version, &flags, &alg))
+	{
+		return -1;
+	}
+	if(key->privkey && args->writepriv)
+	{
+		return dnssec_write_private(bout, key, alg);
+	}
+	return dnssec_write_public(bout, key, alg, domain, flags, version);
+}
+
+int
+dnssec_keyid(kt_key *key, BIO *bout, kt_args *args)
+{
+	const char *domain = "example.com.";
+	int version = 3;
+	int flags = 256;
+	int alg;
+	int r;
+	BIO *mem;
+	BUF_MEM *ptr;
+	unsigned int tag;
+
+	if(get_args(key, args, &domain, &version, &flags, &alg))
+	{
+		return -1;
+	}
+	mem = BIO_new(BIO_s_mem());
+	r = dnssec_write_public_rdata(mem, key, alg, domain, flags, version);
+	if(r)
+	{
+		BIO_free(mem);
+		return r;
+	}
+	BIO_get_mem_ptr(mem, &ptr);	
+	tag = dnssec_keytag(ptr->data, ptr->length, alg);
+	BIO_free(mem);
+	BIO_printf(bout, "K%s+%03d+%05u\n", domain, alg, tag);	
+	return 0;
+}
+
+static int
+get_args(kt_key *key, kt_args *args, const char **domain, int *version, int *flags, int *alg)
+{
+	int hash = NID_undef;
+	const char *t;
 
 	if(args->domain && args->domain[0])
 	{
-		domain = args->domain;
+		*domain = args->domain;
 	}
-	t = strchr(domain, 0);
+	t = strchr(*domain, 0);
 	t--;
 	if(*t != '.')
 	{
-		BIO_printf(args->berr, "%s: DNSSEC: Domain name '%s' does not include a terminating period, which is probably not what you want\n", progname, domain);
+		BIO_printf(args->berr, "%s: DNSSEC: Domain name '%s' does not include a terminating period, which is probably not what you want\n", progname, *domain);
 	}
 	switch(key->type)
 	{
@@ -62,21 +109,20 @@ dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 		switch(hash)
 		{
 		case NID_md5:
-			alg = DNSSEC_ALG_RSAMD5;
+			*alg = DNSSEC_ALG_RSAMD5;
 			break;
 		case NID_sha1:
-			alg = DNSSEC_ALG_RSASHA1;
+			*alg = DNSSEC_ALG_RSASHA1;
 			break;
 		case NID_sha256:
-			alg = DNSSEC_ALG_RSASHA256;
+			*alg = DNSSEC_ALG_RSASHA256;
 			break;
 		case NID_sha512:
-			alg = DNSSEC_ALG_RSASHA512;
+			*alg = DNSSEC_ALG_RSASHA512;
 			break;
 		case NID_undef:
 			/* Default to RSA/SHA-1 */
-			hash = NID_sha1;
-			alg = DNSSEC_ALG_RSASHA1;
+			*alg = DNSSEC_ALG_RSASHA1;
 			break;
 		default:
 			BIO_printf(args->berr, "%s: DNSSEC: Algorithm %d is not supported with RSA keys for DNSSEC output\n", progname, hash);
@@ -87,12 +133,11 @@ dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 		switch(hash)
 		{
 		case NID_sha1:
-			alg = DNSSEC_ALG_DSA;
+			*alg = DNSSEC_ALG_DSA;
 			break;
 		case NID_undef:
 			/* Default to DSA/SHA1 */
-			hash = NID_sha1;
-			alg = DNSSEC_ALG_DSA;
+			*alg = DNSSEC_ALG_DSA;
 			break;
 		default:
 			BIO_printf(args->berr, "%s: DNSSEC: Algorithm %d is not supported with DSA keys for DNSSEC output\n", progname, hash);
@@ -103,11 +148,7 @@ dnssec_output(kt_key *key, BIO *bout, kt_args *args)
 		BIO_printf(args->berr, "%s: DNSSEC Unable to write a %s key\n", progname, kt_type_printname(key->type));
 		return -1;
 	}
-	if(key->privkey && args->writepriv)
-	{
-		return dnssec_write_private(bout, key, alg);
-	}
-	return dnssec_write_public(bout, key, alg, domain, flags, version);
+	return 0;
 }
 
 const char *
@@ -144,7 +185,7 @@ dnssec_alg_printname(int alg)
 	}
 	return "Unknown";
 }
-
+	
 int
 dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version)
 {
@@ -161,7 +202,7 @@ dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int fla
 		return r;
 	}
 	BIO_get_mem_ptr(mem, &ptr);	
-	tag = dnssec_keytag(ptr->data, ptr->length, alg);	
+	tag = dnssec_keytag(ptr->data, ptr->length, alg);
 
 	BIO_printf(bout, ";; %d-bit %s zone key for %s\n", key->size, dnssec_alg_printname(alg), domain);
 	BIO_printf(bout, ";; K%s+%03d+%05u\n", domain, alg, tag);

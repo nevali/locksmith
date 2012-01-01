@@ -236,6 +236,7 @@ extern int rdfxml_output(kt_key *key, BIO *bout, kt_args *args);
 extern int turtle_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int dnssec_output(kt_key *key, BIO *bout, kt_args *args);
+extern int dnssec_keyid(kt_key *key, BIO *bout, kt_args *args);
 extern const char *dnssec_alg_printname(int alg);
 extern int dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version);
 extern int dnssec_write_public_rdata(BIO *bout, kt_key *key, int alg, const char *domain, int flags, int version);

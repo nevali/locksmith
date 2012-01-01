@@ -30,7 +30,7 @@ static kt_handler_entry handlers[] =
 	{ "pgp", "PGP", "OpenPGP (RFC4880) version 4 key format", NULL, pgp_output, pgp_keyid, pgp_fingerprint },
 	{ "rdfxml", "RDF/XML", "RDF/XML format", NULL, rdfxml_output, NULL, NULL },
 	{ "turtle", "Turtle", "RDF (Turtle) format", NULL, turtle_output, NULL, NULL },
-	{ "dnssec", "DNSSEC", "DNSSEC key format", NULL, dnssec_output, NULL, NULL },
+	{ "dnssec", "DNSSEC", "DNSSEC key format", NULL, dnssec_output, dnssec_keyid, NULL },
 	{ "ipgp", "CERT IPGP", "DNS CERT record (RFC4938) type 6 (indirect PGP)", NULL, cert_ipgp_output, NULL, NULL },
 	{ "pka", "PKA", "DNS PKA record", NULL, pka_output, NULL, NULL },	
 	{ "pkcs8", "PKCS#8", "PEM-format PKCS#8 keypairs", NULL, pkcs8_output, NULL, NULL },
