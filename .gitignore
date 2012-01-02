@@ -5,6 +5,9 @@
 *.o
 *.obj
 *.exe
+*.dll
+*.lib
+*.exp
 *.dSYM
 *.xcuserdatad
 .deps
