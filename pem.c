@@ -20,6 +20,97 @@
 
 #include "p_keytool.h"
 
+static kt_match_string matchers[] =
+{
+	{ "-----BEGIN PUBLIC KEY-----", 0, 0 },
+	{ "-----BEGIN RSA PRIVATE KEY-----", 0, 1 },
+	{ "-----BEGIN DSA PRIVATE KEY-----", 0, 1 },
+	{ NULL, 0, 0 }
+};
+
+int
+kt_detect_match(const char *bp, size_t l, kt_match_string *matchers, kt_key *k, kt_args *args)
+{
+	size_t c;
+	const char *p;
+	int t;
+
+	(void) k;
+
+	args->detect_match_entry = -1;
+	for(c = 0; matchers[c].match; c++)
+	{
+		matchers[c].len = strlen(matchers[c].match);
+	}
+	p = bp;
+	do
+	{
+		p = memchr(p, '-', l - (bp - p));
+		if(!p)
+		{
+			break;
+		}
+		t = 0;
+		for(c = 0; matchers[c].match; c++)
+		{
+			if(l - (bp - p) < matchers[c].len)
+			{
+				continue;
+			}
+			t = 1;
+			if(!memcmp(matchers[c].match, p, matchers[c].len))
+			{
+				args->detect_match_entry = c;
+				if(matchers[c].privkey)
+				{
+					args->readpriv = 1;
+				}
+				return c + 1;
+			}
+		}
+		if(!t)
+		{
+			/* Remaining buffer was too short to amtch anything */
+			break;
+		}
+		p++;
+	}
+	while(1);
+	return 0;
+}
+
+int
+kt_detect_match_bio(BIO *bin, kt_match_string *matchers, kt_key *k, kt_args *args)
+{
+	char *bp;
+	ssize_t l;
+	int c;
+
+	bp = (char *) malloc(KT_READ_BUFFER_SIZE);
+	l = BIO_read(bin, bp, KT_READ_BUFFER_SIZE);
+	if(l < 0)
+	{
+		free(bp);
+		return -1;
+	}
+	c = kt_detect_match(bp, l, matchers, k, args);
+	free(bp);
+	return c;
+}
+
+int
+pem_detect(kt_key *k, BIO *bin, kt_args *args)
+{
+	int r;
+
+	r = kt_detect_match_bio(bin, matchers, k, args);
+	if(r < 0)
+	{
+		return -1;
+	}
+	return (r ? 0 : 1);
+}
+
 int
 pem_input(kt_key *k, BIO *bin, kt_args *args)
 {

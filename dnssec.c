@@ -81,7 +81,7 @@ dnssec_keyid(kt_key *key, BIO *bout, kt_args *args)
 		return r;
 	}
 	BIO_get_mem_ptr(mem, &ptr);	
-	tag = dnssec_keytag(ptr->data, ptr->length, alg);
+	tag = dnssec_keytag((const unsigned char *) ptr->data, ptr->length, alg);
 	BIO_free(mem);
 	BIO_printf(bout, "K%s+%03d+%05u\n", domain, alg, tag);	
 	return 0;
@@ -93,6 +93,9 @@ get_args(kt_key *key, kt_args *args, const char **domain, int *version, int *fla
 	int hash = NID_undef;
 	const char *t;
 
+	(void) version;
+	(void) flags;
+	
 	if(args->domain && args->domain[0])
 	{
 		*domain = args->domain;
@@ -225,7 +228,7 @@ dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int fla
 		return r;
 	}
 	BIO_get_mem_ptr(mem, &ptr);	
-	tag = dnssec_keytag(ptr->data, ptr->length, alg);
+	tag = dnssec_keytag((const unsigned char *) ptr->data, ptr->length, alg);
 
 	BIO_printf(bout, ";; %d-bit %s zone key for %s\n", key->size, dnssec_alg_printname(alg), domain);
 	BIO_printf(bout, ";; K%s+%03d+%05u\n", domain, alg, tag);
@@ -250,7 +253,7 @@ dnssec_write_public(BIO *bout, kt_key *key, int alg, const char *domain, int fla
 }
 
 unsigned int
-dnssec_keytag(unsigned char *key, size_t keysize, int alg)
+dnssec_keytag(const unsigned char *key, size_t keysize, int alg)
 {
 	unsigned long ac;
 	size_t i;
@@ -275,6 +278,8 @@ dnssec_write_public_rdata(BIO *bout, kt_key *key, int alg, const char *domain, i
 	size_t l, t;
 	unsigned char buf[4];
 	unsigned char *bp;
+
+	(void) domain;
 
 	buf[0] = (flags >> 8) & 0xff;
 	buf[1] = flags & 0xff;

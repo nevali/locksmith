@@ -20,6 +20,8 @@
 
 #include "p_keytool.h"
 
+#define READ_BUFFER_SIZE                8192
+
 static kt_keytype_entry keytypes[] = 
 {
 	{ "rsa", "RSA", "Rivest, Shamir, Adleman (RSA)", KT_RSA },
@@ -88,17 +90,27 @@ init_output(BIO *file, kt_args *args)
 }
 
 static int
-init_input(BIO *file, kt_args *args, kt_key *k)
+init_input(BIO **file, kt_args *args, kt_key *k)
 {
 	struct stat sbuf;
+	BIO *buf;
 
 	if(args->generate)
 	{
 		return 0;
 	}
+	if(!*file)
+	{
+		if(NULL == (*file = BIO_new(BIO_s_file())))
+		{
+			ERR_print_errors(args->berr);
+			return 1;
+		}
+
+	}		
 	if(args->infile)
 	{
-		if (BIO_read_filename(file, args->infile) <= 0)
+		if (BIO_read_filename(*file, args->infile) <= 0)
 		{
 			BIO_printf(args->berr, "%s: Failed to open %s for reading\n", progname, args->infile);
 			ERR_print_errors(args->berr);
@@ -117,9 +129,43 @@ init_input(BIO *file, kt_args *args, kt_key *k)
 		}
 		args->infile = "*standard input*";
 		setvbuf(stdin, NULL, _IONBF, 0);
-		BIO_set_fp(file, stdin, BIO_NOCLOSE);
+		BIO_set_fp(*file, stdin, BIO_NOCLOSE);
+	}   
+	if(!(buf = BIO_new(BIO_f_buffer())))
+	{
+		ERR_print_errors(args->berr);
+		BIO_free(*file);
+		*file = NULL;
+		return 1;
 	}
+	BIO_set_read_buffer_size(buf, READ_BUFFER_SIZE);
+	*file = BIO_push(buf, *file);
 	return 0;
+}
+
+static int
+detect_input(BIO *bin, kt_args *args, kt_key *k)
+{
+	size_t c;
+	kt_handler_entry *handlers;
+	int r;
+
+	handlers = kt_handlers();
+	for(c = 0; handlers[c].name; c++)
+	{
+		if(handlers[c].detect)
+		{
+			r = handlers[c].detect(k, bin, args);
+			(void) BIO_seek(bin, 0);
+			if(!r)
+			{
+				args->input_handler = &(handlers[c]);
+				return 0;
+			}
+		}
+	}
+	BIO_printf(args->berr, "%s: unable to detect the input format of %s\n", progname, args->infile);
+	return 1;
 }
 
 int
@@ -138,7 +184,8 @@ main(int argc, char **argv)
 	args.berr = berr;
 	args.timestamp = time(NULL);
 	k.timestamp = args.timestamp;
-	
+	bin = bout = NULL;
+
 	if((r = kt_process_args(argc, argv, &args, &k)))
 	{
 		return (r < 0 ? 1 : r);
@@ -159,19 +206,16 @@ main(int argc, char **argv)
 	}
 	else
 	{
-		if(NULL == (bin = BIO_new(BIO_s_file())))
-		{
-			ERR_print_errors(berr);
-			return 1;
-		}
-		if(init_input(bin, &args, &k))
+		if(init_input(&bin, &args, &k))
 		{
 			return 1;
 		}
 		if(!args.input_handler)
 		{
-			/* XXX: Need to add a detection process */
-			args.input_handler = kt_handler_locate("pem");
+			if(detect_input(bin, &args, &k))
+			{
+				return 1;
+			}
 		}
 	}
 	if(!args.output_handler)

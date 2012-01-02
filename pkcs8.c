@@ -20,8 +20,28 @@
 
 #include "p_keytool.h"
 
-/* Read keypairs in PKCS#8 [RFC5208] format */
+static kt_match_string matchers[] =
+{
+	{ "-----BEGIN PRIVATE KEY-----", 0, 1 },
+	{ "-----BEGIN ENCRYPTED PRIVATE KEY-----", 0, 1 },
+	{ NULL, 0, 0 }
+};
 
+int
+pkcs8_detect(kt_key *k, BIO *bin, kt_args *args)
+{
+	int r;
+
+	r = kt_detect_match_bio(bin, matchers, k, args);
+	if(r < 0)
+	{
+		return -1;
+	}	
+	return (r ? 0 : 1);
+}
+
+
+/* Read keypairs in PKCS#8 [RFC5208] format */
 int
 pkcs8_input(kt_key *k, BIO *bin, kt_args *args)
 {

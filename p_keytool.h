@@ -78,11 +78,21 @@
 #  define MIN3(a, b, c)                 MIN(a, MIN(b, c))
 # endif
 
+# define KT_READ_BUFFER_SIZE            8192
+
 typedef struct kt_key_s kt_key;
 typedef struct kt_args_s kt_args;
 typedef struct kt_pgpkeyid_s kt_pgpkeyid;
 typedef struct kt_handler_entry_s kt_handler_entry;
 typedef struct kt_keytype_entry_s kt_keytype_entry;
+typedef struct kt_match_string_s kt_match_string;
+
+struct kt_match_string_s
+{
+	const char *match;
+	size_t len;
+	int privkey;
+};
 
 typedef enum
 {
@@ -118,6 +128,7 @@ struct kt_args_s
 	const char *infile;
 	const char *outfile;
 	kt_handler_entry *input_handler;
+	int detect_match_entry;
 	kt_handler_entry *output_handler;
 	int noout;
 	int keyid;
@@ -143,6 +154,7 @@ struct kt_pgpkeyid_s
 	size_t fplen;
 };
 
+typedef int (*kt_detect_handler)(kt_key *key, BIO *bin, kt_args *args);
 typedef int (*kt_input_handler)(kt_key *key, BIO *bin, kt_args *args);
 typedef int (*kt_output_handler)(kt_key *key, BIO *bout, kt_args *args);
 typedef int (*kt_keyid_handler)(kt_key *key, BIO *bout, kt_args *args);
@@ -153,6 +165,7 @@ struct kt_handler_entry_s
 	const char *name;
 	const char *printname;
 	const char *desc;
+	kt_detect_handler detect;
 	kt_input_handler input;
 	kt_output_handler output;
 	kt_keyid_handler keyid;
@@ -170,8 +183,11 @@ struct kt_keytype_entry_s
 extern const char *progname;
 extern BIO *bio_err;
 
-kt_handler_entry *kt_handlers(void);
-kt_handler_entry *kt_handler_locate(const char *name);
+extern kt_handler_entry *kt_handlers(void);
+extern kt_handler_entry *kt_handler_locate(const char *name);
+
+extern int kt_detect_match(const char *bp, size_t l, kt_match_string *matchers, kt_key *k, kt_args *args);
+extern int kt_detect_match_bio(BIO *bin, kt_match_string *matchers, kt_key *k, kt_args *args);
 
 extern int kt_process_args(int argc, char **argv, kt_args *args, kt_key *key);
 
@@ -191,6 +207,7 @@ extern int kt_key_from_evp(EVP_PKEY *pkey, kt_key *key);
 
 extern int text_output(kt_key *key, BIO *bout, kt_args *args);
 
+extern int pem_detect(kt_key *key, BIO *bin, kt_args *args);
 extern int pem_input(kt_key *key, BIO *bin, kt_args *args);
 extern int pem_output(kt_key *key, BIO *bout, kt_args *args);
 
@@ -246,12 +263,13 @@ extern int dnssec_write_public_rdata(BIO *bout, kt_key *key, int alg, const char
 extern int dnssec_write_private(BIO *bout, kt_key *key, int alg);
 extern int dnssec_write_bn_base64(BIO *bout, const char *prefix, BIGNUM *num, const char *suffix);
 extern int dnssec_write_bn_fixed(BIO *bout, BIGNUM *bn, unsigned char *buf, size_t nbytes);
-extern unsigned int dnssec_keytag(unsigned char *key, size_t keysize, int alg);
+extern unsigned int dnssec_keytag(const unsigned char *key, size_t keysize, int alg);
 
 extern int cert_ipgp_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int pka_output(kt_key *key, BIO *bout, kt_args *args);
 
+extern int pkcs8_detect(kt_key *key, BIO *bin, kt_args *args);
 extern int pkcs8_input(kt_key *key, BIO *bout, kt_args *args);
 extern int pkcs8_output(kt_key *key, BIO *bout, kt_args *args);
 
