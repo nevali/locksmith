@@ -19,9 +19,9 @@ PKG_CHECK_MODULES([libcrypto],[libcrypto >= 0.9.8],[
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LIBS])
 
-AC_CHECK_HEADERS([unistd.h inttypes.h stdint.h sys/stat.h sys/types.h])
+AC_CHECK_HEADERS([unistd.h inttypes.h stdint.h sys/stat.h sys/types.h io.h])
 AC_HEADER_TIME
-AC_CHECK_FUNCS([strrchr])
+AC_CHECK_FUNCS([strrchr getopt])
 
 AC_CONFIG_HEADERS([config.h])
 
