@@ -5,10 +5,11 @@
 *.o
 *.obj
 *.exe
+*.dSYM
 .deps
 Makefile.in
 Makefile
-/keytool
+/locksmith
 /configure
 /config.h
 /config.h.in*

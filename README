@@ -1,6 +1,6 @@
-This is keytool, a utility for manipulating public and private keys.
+This is locksmith, a utility for manipulating public and private keys.
 
-http://github.com/nevali/keytool
+http://github.com/nevali/locksmith
 
 Current status:
 	! Encrypted keys can't be read or written at the moment. NO CARE IS
@@ -32,10 +32,10 @@ Examples:
 	a signed user ID. The PGP key timestamp will match the private key
 	file timestamp:
 
-	    $ keytool -i rsa-private.pem -o rsa-private.pgp -O pgp \
+	    $ locksmith -i rsa-private.pem -o rsa-private.pgp -O pgp \
 	        -C 'Joe Bloggs <joe.bloggs@example.com>'
 
 	Read an RSA public key in PEM format and print just the SSH (MD5)
 	fingerprint:
 
-	    $ keytool -i rsa-public.pem -O ssh2 -f -n
+	    $ locksmith -i rsa-public.pem -O ssh2 -f -n

@@ -30,7 +30,7 @@ static kt_keytype_entry keytypes[] =
 	{ NULL, NULL, NULL, KT_ERROR }
 };
 
-const char *progname = "keytool";
+const char *progname = "locksmith";
 BIO *bio_err = NULL;
 
 kt_keytype_entry *
