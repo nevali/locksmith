@@ -1,0 +1,308 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CD82543014B1E3D80074A346 /* args.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82541E14B1E3D80074A346 /* args.c */; };
+		CD82543114B1E3D80074A346 /* cert-ipgp.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82541F14B1E3D80074A346 /* cert-ipgp.c */; };
+		CD82543214B1E3D80074A346 /* der.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542014B1E3D80074A346 /* der.c */; };
+		CD82543314B1E3D80074A346 /* dnssec.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542114B1E3D80074A346 /* dnssec.c */; };
+		CD82543414B1E3D80074A346 /* generate.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542214B1E3D80074A346 /* generate.c */; };
+		CD82543514B1E3D80074A346 /* handlers.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542314B1E3D80074A346 /* handlers.c */; };
+		CD82543614B1E3D80074A346 /* keytool.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542414B1E3D80074A346 /* keytool.c */; };
+		CD82543714B1E3D80074A346 /* openssh.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542514B1E3D80074A346 /* openssh.c */; };
+		CD82543814B1E3D80074A346 /* pem.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542714B1E3D80074A346 /* pem.c */; };
+		CD82543914B1E3D80074A346 /* pgp.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542814B1E3D80074A346 /* pgp.c */; };
+		CD82543A14B1E3D80074A346 /* pka.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542914B1E3D80074A346 /* pka.c */; };
+		CD82543B14B1E3D80074A346 /* pkcs8.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542A14B1E3D80074A346 /* pkcs8.c */; };
+		CD82543C14B1E3D80074A346 /* rdfxml.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542B14B1E3D80074A346 /* rdfxml.c */; };
+		CD82543D14B1E3D80074A346 /* ssh.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542C14B1E3D80074A346 /* ssh.c */; };
+		CD82543E14B1E3D80074A346 /* sshfp.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542D14B1E3D80074A346 /* sshfp.c */; };
+		CD82543F14B1E3D80074A346 /* text.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542E14B1E3D80074A346 /* text.c */; };
+		CD82544014B1E3D80074A346 /* turtle.c in Sources */ = {isa = PBXBuildFile; fileRef = CD82542F14B1E3D80074A346 /* turtle.c */; };
+		CD82544214B1E51F0074A346 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CD82544114B1E51F0074A346 /* libcrypto.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CD82540A14B1E2FC0074A346 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		CD82540C14B1E2FC0074A346 /* Locksmith */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Locksmith; path = locksmith; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD82541E14B1E3D80074A346 /* args.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = args.c; sourceTree = SOURCE_ROOT; };
+		CD82541F14B1E3D80074A346 /* cert-ipgp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "cert-ipgp.c"; sourceTree = SOURCE_ROOT; };
+		CD82542014B1E3D80074A346 /* der.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = der.c; sourceTree = SOURCE_ROOT; };
+		CD82542114B1E3D80074A346 /* dnssec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dnssec.c; sourceTree = SOURCE_ROOT; };
+		CD82542214B1E3D80074A346 /* generate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = generate.c; sourceTree = SOURCE_ROOT; };
+		CD82542314B1E3D80074A346 /* handlers.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = handlers.c; sourceTree = SOURCE_ROOT; };
+		CD82542414B1E3D80074A346 /* keytool.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = keytool.c; sourceTree = SOURCE_ROOT; };
+		CD82542514B1E3D80074A346 /* openssh.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = openssh.c; sourceTree = SOURCE_ROOT; };
+		CD82542614B1E3D80074A346 /* p_keytool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = p_keytool.h; sourceTree = SOURCE_ROOT; };
+		CD82542714B1E3D80074A346 /* pem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pem.c; sourceTree = SOURCE_ROOT; };
+		CD82542814B1E3D80074A346 /* pgp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pgp.c; sourceTree = SOURCE_ROOT; };
+		CD82542914B1E3D80074A346 /* pka.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pka.c; sourceTree = SOURCE_ROOT; };
+		CD82542A14B1E3D80074A346 /* pkcs8.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pkcs8.c; sourceTree = SOURCE_ROOT; };
+		CD82542B14B1E3D80074A346 /* rdfxml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rdfxml.c; sourceTree = SOURCE_ROOT; };
+		CD82542C14B1E3D80074A346 /* ssh.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ssh.c; sourceTree = SOURCE_ROOT; };
+		CD82542D14B1E3D80074A346 /* sshfp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sshfp.c; sourceTree = SOURCE_ROOT; };
+		CD82542E14B1E3D80074A346 /* text.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = text.c; sourceTree = SOURCE_ROOT; };
+		CD82542F14B1E3D80074A346 /* turtle.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = turtle.c; sourceTree = SOURCE_ROOT; };
+		CD82544114B1E51F0074A346 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = SDKs/MacOSX10.6.sdk/usr/lib/libcrypto.dylib; sourceTree = DEVELOPER_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CD82540914B1E2FC0074A346 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD82544214B1E51F0074A346 /* libcrypto.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CD82540114B1E2FC0074A346 = {
+			isa = PBXGroup;
+			children = (
+				CD82540F14B1E2FC0074A346 /* Sources */,
+				CDF1C41F14B1E5E5000E3782 /* Libraries */,
+				CD82540D14B1E2FC0074A346 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CD82540D14B1E2FC0074A346 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CD82540C14B1E2FC0074A346 /* Locksmith */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CD82540F14B1E2FC0074A346 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				CD82541E14B1E3D80074A346 /* args.c */,
+				CD82541F14B1E3D80074A346 /* cert-ipgp.c */,
+				CD82542014B1E3D80074A346 /* der.c */,
+				CD82542114B1E3D80074A346 /* dnssec.c */,
+				CD82542214B1E3D80074A346 /* generate.c */,
+				CD82542314B1E3D80074A346 /* handlers.c */,
+				CD82542414B1E3D80074A346 /* keytool.c */,
+				CD82542514B1E3D80074A346 /* openssh.c */,
+				CD82542614B1E3D80074A346 /* p_keytool.h */,
+				CD82542714B1E3D80074A346 /* pem.c */,
+				CD82542814B1E3D80074A346 /* pgp.c */,
+				CD82542914B1E3D80074A346 /* pka.c */,
+				CD82542A14B1E3D80074A346 /* pkcs8.c */,
+				CD82542B14B1E3D80074A346 /* rdfxml.c */,
+				CD82542C14B1E3D80074A346 /* ssh.c */,
+				CD82542D14B1E3D80074A346 /* sshfp.c */,
+				CD82542E14B1E3D80074A346 /* text.c */,
+				CD82542F14B1E3D80074A346 /* turtle.c */,
+			);
+			name = Sources;
+			path = Locksmith;
+			sourceTree = "<group>";
+		};
+		CDF1C41F14B1E5E5000E3782 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				CD82544114B1E51F0074A346 /* libcrypto.dylib */,
+			);
+			name = Libraries;
+			path = Locksmith;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CD82540B14B1E2FC0074A346 /* locksmith */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CD82541614B1E2FC0074A346 /* Build configuration list for PBXNativeTarget "locksmith" */;
+			buildPhases = (
+				CD82540814B1E2FC0074A346 /* Sources */,
+				CD82540914B1E2FC0074A346 /* Frameworks */,
+				CD82540A14B1E2FC0074A346 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = locksmith;
+			productName = Locksmith;
+			productReference = CD82540C14B1E2FC0074A346 /* Locksmith */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CD82540314B1E2FC0074A346 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+				ORGANIZATIONNAME = BBC;
+			};
+			buildConfigurationList = CD82540614B1E2FC0074A346 /* Build configuration list for PBXProject "Locksmith" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = CD82540114B1E2FC0074A346;
+			productRefGroup = CD82540D14B1E2FC0074A346 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CD82540B14B1E2FC0074A346 /* locksmith */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CD82540814B1E2FC0074A346 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD82543014B1E3D80074A346 /* args.c in Sources */,
+				CD82543114B1E3D80074A346 /* cert-ipgp.c in Sources */,
+				CD82543214B1E3D80074A346 /* der.c in Sources */,
+				CD82543314B1E3D80074A346 /* dnssec.c in Sources */,
+				CD82543414B1E3D80074A346 /* generate.c in Sources */,
+				CD82543514B1E3D80074A346 /* handlers.c in Sources */,
+				CD82543614B1E3D80074A346 /* keytool.c in Sources */,
+				CD82543714B1E3D80074A346 /* openssh.c in Sources */,
+				CD82543814B1E3D80074A346 /* pem.c in Sources */,
+				CD82543914B1E3D80074A346 /* pgp.c in Sources */,
+				CD82543A14B1E3D80074A346 /* pka.c in Sources */,
+				CD82543B14B1E3D80074A346 /* pkcs8.c in Sources */,
+				CD82543C14B1E3D80074A346 /* rdfxml.c in Sources */,
+				CD82543D14B1E3D80074A346 /* ssh.c in Sources */,
+				CD82543E14B1E3D80074A346 /* sshfp.c in Sources */,
+				CD82543F14B1E3D80074A346 /* text.c in Sources */,
+				CD82544014B1E3D80074A346 /* turtle.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		CD82541414B1E2FC0074A346 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TIME_WITH_SYS_TIME,
+					HAVE_SYS_STAT_H,
+					HAVE_STDINT_H,
+					HAVE_INTTYPES_H,
+					HAVE_SYS_TYPES_H,
+					HAVE_UNISTD_H,
+					"DEBUG=1",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		CD82541514B1E2FC0074A346 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TIME_WITH_SYS_TIME,
+					HAVE_SYS_STAT_H,
+					HAVE_STDINT_H,
+					HAVE_INTTYPES_H,
+					HAVE_SYS_TYPES_H,
+					HAVE_UNISTD_H,
+					NDEBUG,
+				);
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		CD82541714B1E2FC0074A346 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.6;
+			};
+			name = Debug;
+		};
+		CD82541814B1E2FC0074A346 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_PREPROCESSOR_DEFINITIONS = NDEBUG;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CD82540614B1E2FC0074A346 /* Build configuration list for PBXProject "Locksmith" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CD82541414B1E2FC0074A346 /* Debug */,
+				CD82541514B1E2FC0074A346 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CD82541614B1E2FC0074A346 /* Build configuration list for PBXNativeTarget "locksmith" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CD82541714B1E2FC0074A346 /* Debug */,
+				CD82541814B1E2FC0074A346 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CD82540314B1E2FC0074A346 /* Project object */;
+}

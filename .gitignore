@@ -6,6 +6,7 @@
 *.obj
 *.exe
 *.dSYM
+*.xcuserdatad
 .deps
 Makefile.in
 Makefile
