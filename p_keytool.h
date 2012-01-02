@@ -128,7 +128,7 @@ struct kt_args_s
 	const char *infile;
 	const char *outfile;
 	kt_handler_entry *input_handler;
-	int detect_match_entry;
+	size_t detect_match_entry;
 	kt_handler_entry *output_handler;
 	int noout;
 	int keyid;
@@ -246,8 +246,9 @@ extern int pgp_write_issuer_subpkt(BIO *bout, kt_pgpkeyid *keyid);
 extern int pgp_write_bn(BIO *bout, BIGNUM *bn);
 extern int pgp_write_key_material(BIO *bout, kt_key *key);
 extern int pgp_write_packet(BIO *bout, int tag, BUF_MEM *buffer);
-extern int pgp_write_packet_header(BIO *bout, int tag, int length);
-extern int pgp_write_subpkt_header(BIO *bout, int tag, int length);
+extern int pgp_write_packet_header(BIO *bout, int tag, size_t length);
+extern int pgp_write_subpkt(BIO *bout, int tag, BUF_MEM *buffer);
+extern int pgp_write_subpkt_header(BIO *bout, int tag, size_t length);
 extern int pgp_write_digest_signature(BIO *bout, int hash, kt_key *key, const unsigned char *digest, size_t digestlen);
 
 extern int rdfxml_output(kt_key *key, BIO *bout, kt_args *args);

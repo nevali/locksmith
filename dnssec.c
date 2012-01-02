@@ -308,10 +308,10 @@ dnssec_write_public_rdata(BIO *bout, kt_key *key, int alg, const char *domain, i
 		/* Write the exponent */
 		bp = (unsigned char *) malloc((BN_num_bytes(key->k.rsa->n)));
 		BN_bn2bin(key->k.rsa->e, bp);
-		BIO_write(bout, bp, l);
+		BIO_write(bout, bp, (int) l);
 		/* Write the modulus */
 		l = BN_bn2bin(key->k.rsa->n, bp);
-		BIO_write(bout, bp, l);
+		BIO_write(bout, bp, (int) l);
 		break;
 	case KT_DSA:
 		/* Calculate the T value, where 0 <= T <= 8
@@ -365,7 +365,7 @@ dnssec_write_bn_fixed(BIO *bout, BIGNUM *bn, unsigned char *buf, size_t nbytes)
 		bp += nbytes - l;
 	}
 	BN_bn2bin(bn, bp);
-	BIO_write(bout, buf, nbytes);
+	BIO_write(bout, buf, (int) nbytes);
 	return 0;
 }
 
@@ -424,19 +424,19 @@ dnssec_write_bn_base64(BIO *bout, const char *prefix, BIGNUM *num, const char *s
 	mbio = BIO_push(b64, mbio);
 	BIO_set_flags(mbio, BIO_FLAGS_BASE64_NO_NL);
 	BN_bn2bin(num, buf);
-	BIO_write(mbio, buf, l);
+	BIO_write(mbio, buf, (int) l);
 	(void) BIO_flush(mbio);
 	mbio = BIO_pop(mbio);
 	BIO_free(b64);
 	if(prefix)
 	{
-		BIO_write(bout, prefix, strlen(prefix));
+		BIO_write(bout, prefix, (int) strlen(prefix));
 	}
 	BIO_get_mem_ptr(mbio, &ptr);
 	BIO_write(bout, ptr->data, ptr->length);
 	if(suffix)
 	{
-		BIO_write(bout, suffix, strlen(suffix));
+		BIO_write(bout, suffix, (int) strlen(suffix));
 	}
 	return 0;
 }

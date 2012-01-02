@@ -98,7 +98,7 @@ kt_detect_match(const char *bp, size_t l, kt_match_string *matchers, kt_key *k, 
 				{
 					args->readpriv = 1;
 				}
-				return c + 1;
+				return (int) c + 1;
 			}
 		}
 		if(!t)

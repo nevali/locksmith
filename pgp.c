@@ -199,8 +199,8 @@ pgp_keyid(kt_key *key, BIO *bout, kt_args *args)
 int
 pgp_write_userid_packet(BIO *bout, const char *userid)
 {
-	pgp_write_packet_header(bout, PGP_PKT_USERID, strlen(userid));
-	BIO_write(bout, userid, strlen(userid));
+	pgp_write_packet_header(bout, PGP_PKT_USERID, (int) strlen(userid));
+	BIO_write(bout, userid, (int) strlen(userid));
 	return 0;
 }
 
@@ -391,7 +391,7 @@ pgp_write_userid_sig_packet(BIO *bout, kt_key *key, const char *userid, int sigt
 	buf[3] = (l >> 8) & 0xff;
 	buf[4] = l & 0xff;
 	BIO_write(target, buf, 5);
-	BIO_write(target, userid, l);
+	BIO_write(target, userid, (int) l);
 	
 	/* Write the signature */
 	BIO_get_mem_ptr(hashed, &hashed_ptr);
@@ -554,7 +554,7 @@ pgp_write_digest_signature(BIO *bout, int hash, kt_key *key, const unsigned char
 	case KT_RSA:
 		siglen = RSA_size(key->k.rsa);
 		sigbuf = (unsigned char *) malloc(siglen);
-		if(RSA_sign(nid, digest, digestlen, sigbuf, (unsigned int *) &siglen, key->k.rsa))
+		if(RSA_sign(nid, digest, (unsigned int) digestlen, sigbuf, (unsigned int *) &siglen, key->k.rsa))
 		{
 			r = 0;
 		}
@@ -564,7 +564,7 @@ pgp_write_digest_signature(BIO *bout, int hash, kt_key *key, const unsigned char
 		}
 		break;
 	case KT_DSA:
-		if((sig = DSA_do_sign(digest, digestlen, key->k.dsa)))
+		if((sig = DSA_do_sign(digest, (unsigned int) digestlen, key->k.dsa)))
 		{
 			r = 0;
 			pgp_write_bn(bout, sig->r);
@@ -621,13 +621,13 @@ pgp_write_bn(BIO *bout, BIGNUM *bn)
 		mbufsize = n;
 	}
 	n = BN_bn2bin(bn, mbuf);
-	BIO_write(bout, mbuf, n);
+	BIO_write(bout, mbuf, (int) n);
 	return 0;
 }
 
 /* Write a new-format OpenPGP packet header to a BIO */
 int
-pgp_write_packet_header(BIO *bout, int tag, int length)
+pgp_write_packet_header(BIO *bout, int tag, size_t length)
 {
 	unsigned char buf[8];
 	
@@ -688,7 +688,7 @@ pgp_write_subpkt(BIO *bout, int tag, BUF_MEM *buffer)
 
 /* Write a subpacket header to a BIO */
 int
-pgp_write_subpkt_header(BIO *bout, int tag, int length)
+pgp_write_subpkt_header(BIO *bout, int tag, size_t length)
 {
 	unsigned char buf[8];
 	
@@ -750,7 +750,7 @@ pgp_write_prefsymmetric_subpkt(BIO *bout, unsigned char *algo, size_t nalgo)
 	{
 		return r;
 	}
-	BIO_write(bout, algo, nalgo);
+	BIO_write(bout, algo, (int) nalgo);
 	return 0;
 }
 
@@ -764,7 +764,7 @@ pgp_write_prefhash_subpkt(BIO *bout, unsigned char *algo, size_t nalgo)
 	{
 		return r;
 	}
-	BIO_write(bout, algo, nalgo);
+	BIO_write(bout, algo, (int) nalgo);
 	return 0;
 }
 
@@ -778,7 +778,7 @@ pgp_write_prefcomp_subpkt(BIO *bout, unsigned char *algo, size_t nalgo)
 	{
 		return r;
 	}
-	BIO_write(bout, algo, nalgo);
+	BIO_write(bout, algo, (int) nalgo);
 	return 0;
 }
 

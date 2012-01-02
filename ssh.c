@@ -39,7 +39,7 @@ ssh_fingerprint(kt_key *k, BIO *bout, kt_args *args)
 	if(mdlen < 0)
 	{
 		BIO_printf(args->berr, "%s: SSH: unable to generate an SSH fingerprint for a %s key\n", progname, kt_type_printname(k->type));
-		return mdlen;
+		return (int) mdlen;
 	}
 	BIO_printf(bout, "%d", k->size);
 	for(i = 0; i < mdlen; i++)
@@ -168,7 +168,7 @@ ssh_write_str(BIO *bout, const char *str)
 	lbytes[2] = (length >> 8) & 0xFF;
 	lbytes[3] = length & 0xFF;
 	BIO_write(bout, lbytes, 4);
-	BIO_write(bout, str, length);
+	BIO_write(bout, str, (int) length);
 	return 0;
 }
 
@@ -193,6 +193,6 @@ ssh_write_bn(BIO *bout, BIGNUM *num, unsigned char *buf, size_t *buflen)
 		*buflen = l;
 	}
 	l = BN_bn2mpi(num, buf);
-	BIO_write(bout, buf, l);
+	BIO_write(bout, buf, (int) l);
 	return buf;
 }
