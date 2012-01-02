@@ -218,6 +218,7 @@
 					HAVE_INTTYPES_H,
 					HAVE_SYS_TYPES_H,
 					HAVE_UNISTD_H,
+					HAVE_GETOPT,
 					"DEBUG=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
@@ -249,6 +250,7 @@
 					HAVE_INTTYPES_H,
 					HAVE_SYS_TYPES_H,
 					HAVE_UNISTD_H,
+					HAVE_GETOPT,
 					NDEBUG,
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
