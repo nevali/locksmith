@@ -59,6 +59,10 @@
 #  include <unistd.h>
 # endif
 
+# ifdef HAVE_IO_H
+#  include <io.h>
+# endif
+
 # include <openssl/err.h>
 # include <openssl/buffer.h>
 # include <openssl/bn.h>
@@ -70,6 +74,14 @@
 # include <openssl/engine.h>
 # include <openssl/objects.h>
 # include <openssl/x509.h>
+
+# if defined(_WIN32)
+typedef long ssize_t;
+
+#  undef isatty
+#  define isatty(fd)                    _isatty(fd)
+
+# endif
 
 # ifndef MIN
 #  define MIN(a, b)                     ((a) < (b) ? (a) : (b))
@@ -182,6 +194,16 @@ struct kt_keytype_entry_s
 
 extern const char *progname;
 extern BIO *bio_err;
+
+# ifndef HAVE_GETOPT
+extern int optind;
+extern int opterr;
+extern int optopt;
+extern int optreset;
+extern char *optarg;
+
+extern int getopt(int nargc, char * const *nargv, const char *ostr);
+# endif
 
 extern kt_handler_entry *kt_handlers(void);
 extern kt_handler_entry *kt_handler_locate(const char *name);

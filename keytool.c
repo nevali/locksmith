@@ -22,6 +22,10 @@
 
 #define READ_BUFFER_SIZE                8192
 
+#if defined(_WIN32)
+# include <openssl/applink.c>
+#endif
+
 static kt_keytype_entry keytypes[] = 
 {
 	{ "rsa", "RSA", "Rivest, Shamir, Adleman (RSA)", KT_RSA },
@@ -176,6 +180,10 @@ main(int argc, char **argv)
 	BIO *bin, *berr, *bout;
 	int r;
 
+#if defined(_MSC_VER) && (defined(_WIN32))
+	CRYPTO_malloc_init();
+#endif
+	
 	memset(&k, 0, sizeof(k));
 	memset(&args, 0, sizeof(args));
 	berr = BIO_new(BIO_s_file());

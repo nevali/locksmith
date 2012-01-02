@@ -270,7 +270,7 @@ pgp_write_pubkey_packet_body(BIO *bout, kt_key *key, time_t timestamp)
 	buf[0] = 4; /* Version */
 	BIO_write(bout, buf, 1);
 	
-	t = timestamp;
+	t = (unsigned long) timestamp;
 	/* Key creation time (seconds since Unix epoch) */	
 	buf[0] = (t >> 24) & 0xff;
 	buf[1] = (t >> 16) & 0xff;

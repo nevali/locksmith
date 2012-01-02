@@ -264,35 +264,43 @@ parse_timestamp(const char *ts, struct tm *tm)
 	ts = NULL;
 	if(n == 14)
 	{		
-		ts = strptime(tbuf, "%Y%m%d%H%M%S", tm);
-	}	if(n == 12)
+		sscanf(tbuf, "%04d%02d%02d%02d%02d%02d", &tm->tm_year, &tm->tm_mon, &tm->tm_mday, &tm->tm_hour, &tm->tm_min, &tm->tm_sec);
+		tm->tm_mon--;
+		return 0;
+	}
+	if(n == 12)
 	{
-		ts = strptime(tbuf, "%Y%m%d%H%M", tm);
+		sscanf(tbuf, "%04d%02d%02d%02d%02d", &tm->tm_year, &tm->tm_mon, &tm->tm_mday, &tm->tm_hour, &tm->tm_min);
+		tm->tm_mon--;
+		return 0;
 	}
 	else if(n == 10)
 	{
-		ts = strptime(tbuf, "%Y%m%d%H", tm);
+		sscanf(tbuf, "%04d%02d%02d%02d", &tm->tm_year, &tm->tm_mon, &tm->tm_mday, &tm->tm_hour);
+		tm->tm_mon--;
+		return 0;
 	}
 	else if(n == 8)
 	{
-		ts = strptime(tbuf, "%Y%m%d", tm);
+		sscanf(tbuf, "%04d%02d%02d", &tm->tm_year, &tm->tm_mon, &tm->tm_mday);
+		tm->tm_mon--;
+		return 0;
 	}
 	else if(n == 6)
 	{
-		ts = strptime(tbuf, "%Y%m", tm);
+		sscanf(tbuf, "%04d%02d", &tm->tm_year, &tm->tm_mon);
+		tm->tm_mon--;
 		tm->tm_mday = 1;
+		return 0;
 	}
 	else if(n == 4)
 	{
-		ts = strptime(tbuf, "%Y", tm);
+		sscanf(tbuf, "%04d", &tm->tm_year);
 		tm->tm_mday = 1;
+		return 0;
 	}
-	if(!ts || ts[0])
-	{
-		BIO_printf(bio_err, "%s: invalid timestamp '%s'\n", progname, p);
-		return -1;		
-	}
-	return 0;
+	BIO_printf(bio_err, "%s: invalid timestamp '%s'\n", progname, p);
+	return -1;		
 }
 
 static void
