@@ -191,6 +191,7 @@ main(int argc, char **argv)
 	bio_err = berr;
 	args.berr = berr;
 	args.timestamp = time(NULL);
+	args.detect_match_entry = -1;
 	k.timestamp = args.timestamp;
 	bin = bout = NULL;
 

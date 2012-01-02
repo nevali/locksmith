@@ -93,7 +93,7 @@ kt_detect_match(const char *bp, size_t l, kt_match_string *matchers, kt_key *k, 
 			t = 1;
 			if(!memcmp(matchers[c].match, p, matchers[c].len))
 			{
-				args->detect_match_entry = c;
+				args->detect_match_entry = (ssize_t) c;
 				if(matchers[c].privkey)
 				{
 					args->readpriv = 1;

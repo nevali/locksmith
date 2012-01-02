@@ -140,7 +140,7 @@ struct kt_args_s
 	const char *infile;
 	const char *outfile;
 	kt_handler_entry *input_handler;
-	size_t detect_match_entry;
+	ssize_t detect_match_entry;
 	kt_handler_entry *output_handler;
 	int noout;
 	int keyid;
