@@ -23,16 +23,22 @@
 int
 text_output(kt_key *key, BIO *bout, kt_args *args)
 {
+	char timebuf[64];
+	struct tm *tm;
+
 	(void) args;
+	
+	tm = gmtime(&(key->timestamp));
+	strftime(timebuf, sizeof(timebuf), "%Y-%m-%dT%H:%M:%SZ", tm);
 
 	switch(key->type)
 	{
 	case KT_RSA:
-		fprintf(stderr, "RSA %s key\n", (key->privkey ? "private" : "public"));
+		fprintf(stderr, "RSA %s key\nKey timestamp:\n    %s\n", (key->privkey ? "private" : "public"), timebuf);
 		RSA_print(bout, key->k.rsa, 0);
 		break;
 	case KT_DSA:
-		fprintf(stderr, "DSA %s key\n", (key->privkey ? "private" : "public"));
+		fprintf(stderr, "DSA %s key\nKey timestamp:\n    %s\n", (key->privkey ? "private" : "public"), timebuf);
 		DSA_print(bout, key->k.dsa, 0);
 		break;
 	case KT_DSAPARAM:
