@@ -25,6 +25,8 @@ static kt_match_string matchers[] =
 	{ "-----BEGIN PUBLIC KEY-----", 0, 0 },
 	{ "-----BEGIN RSA PRIVATE KEY-----", 0, 1 },
 	{ "-----BEGIN DSA PRIVATE KEY-----", 0, 1 },
+	{ "-----BEGIN DSA PARAMETERS-----", 0, 0 },
+	{ "-----BEGIN DH PARAMETERS-----", 0, 0 },
 	{ NULL, 0, 0 }
 };
 
@@ -47,9 +49,15 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 	EVP_PKEY *pkey = NULL;
 	pem_password_cb *callback = NULL;
 	void *cbdata = NULL;
-	unsigned long e;
 	kt_keytype ktype;
 
+	if(args->detect_match_entry == -1)
+	{
+		/* No detection pass has been run, try one now */
+		pem_detect(k, bin, args);
+		(void) BIO_seek(bin, 0);
+	}
+	ktype = k->type;
 	if(args->readpriv)
 	{
 		pkey = PEM_read_bio_PrivateKey(bin, NULL, callback, cbdata);
@@ -61,45 +69,50 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 		}
 		k->privkey = 1;
 	}
+	else if(args->detect_match_entry == 3)
+	{
+		/* DSA Parameters */
+		k->type = KT_DSAPARAM;
+		if(!(k->k.dsa = PEM_read_bio_DSAparams(bin, NULL, callback, cbdata)))
+		{
+			BIO_printf(args->berr, "%s: PEM: unable to load DSA parameters from %s\n", progname, args->infile);
+			ERR_print_errors(args->berr);
+			return 1;
+		}				
+
+	}
+	else if(args->detect_match_entry == 4)
+	{
+		/* DH Parameters */
+		k->type = KT_DHPARAM;
+		if(!(k->k.dh = PEM_read_bio_DHparams(bin, NULL, callback, cbdata)))
+		{
+			BIO_printf(args->berr, "%s: PEM: unable to load Diffie-Hellman parameters from %s\n", progname, args->infile);
+			ERR_print_errors(args->berr);
+			return 1;
+		}				
+	}
 	else
 	{
 		pkey = PEM_read_bio_PUBKEY(bin, NULL, callback, cbdata);
 		if(pkey == NULL)
 		{
-			e = ERR_peek_error();
-			/* It may be that we couldn't load the key because it's a private
-			 * key -- try that instead.
-			 */
-			if(ERR_GET_LIB(e) == ERR_LIB_PEM)
-			{
-				if(ERR_GET_REASON(e) == PEM_R_NO_START_LINE)
-				{
-					(void) BIO_reset(bin);
-					pkey = PEM_read_bio_PrivateKey(bin, NULL, callback, cbdata);
-					if(pkey != NULL)
-					{
-						ERR_clear_error();
-						k->privkey = 1;
-					}
-				}
-			}
-			if(pkey == NULL)
-			{
-				BIO_printf(args->berr, "%s: PEM: unable to load key from %s\n", progname, args->infile);
-				ERR_print_errors(args->berr);
-				return 1;
-			}
+			BIO_printf(args->berr, "%s: PEM: unable to load key from %s\n", progname, args->infile);
+			ERR_print_errors(args->berr);
+			return 1;
 		}
 	}
-	ktype = k->type;
-	if(kt_key_from_evp(pkey, k))
+	if(pkey)
 	{
-		BIO_printf(args->berr, "%s: PEM: unable to handle a %s key\n", progname, kt_evptype_printname(pkey));
+		if(kt_key_from_evp(pkey, k))
+		{
+			BIO_printf(args->berr, "%s: PEM: unable to handle a %s key\n", progname, kt_evptype_printname(pkey));
+			EVP_PKEY_free(pkey);
+			return 1;
+		}
+		EVP_PKEY_assign(pkey, EVP_PKEY_NONE, NULL);
 		EVP_PKEY_free(pkey);
-		return 1;
 	}
-	EVP_PKEY_assign(pkey, EVP_PKEY_NONE, NULL);
-	EVP_PKEY_free(pkey);
 	/* If an explicit type was requested, it's an error if the key read from
 	 * the PEM file is a different type.
 	 */
