@@ -129,7 +129,7 @@ pem_output(kt_key *k, BIO *bout, kt_args *args)
 {
 	EVP_PKEY *pkey;
 	EVP_CIPHER *cipher = NULL;
-	char *kstr = NULL;
+	unsigned char *kstr = NULL;
 	int klen = 0;
 	pem_password_cb *callback = NULL;
 	void *cbdata = NULL;
@@ -157,7 +157,17 @@ pem_output(kt_key *k, BIO *bout, kt_args *args)
 	}
 	if(k->privkey && args->writepriv)
 	{
-		PEM_write_bio_PKCS8PrivateKey(bout, pkey, cipher, kstr, klen, callback, cbdata);		
+		switch(k->type)
+		{
+		case KT_RSA:
+			PEM_write_bio_RSAPrivateKey(bout, k->k.rsa, cipher, kstr, klen, callback, cbdata);
+			break;
+		case KT_DSA:
+			PEM_write_bio_DSAPrivateKey(bout, k->k.dsa, cipher, kstr, klen, callback, cbdata);
+			break;
+		default:
+			break;
+		}
 	}
 	else
 	{
