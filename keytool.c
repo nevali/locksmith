@@ -20,8 +20,6 @@
 
 #include "p_keytool.h"
 
-#define READ_BUFFER_SIZE                8192
-
 #if defined(_WIN32)
 # include <openssl/applink.c>
 #endif
@@ -142,7 +140,7 @@ init_input(BIO **file, kt_args *args, kt_key *k)
 		*file = NULL;
 		return 1;
 	}
-	BIO_set_read_buffer_size(buf, READ_BUFFER_SIZE);
+	BIO_set_read_buffer_size(buf, KT_READ_BUFFER_SIZE);
 	*file = BIO_push(buf, *file);
 	return 0;
 }
