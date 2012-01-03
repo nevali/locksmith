@@ -92,6 +92,10 @@ typedef long ssize_t;
 
 # define KT_READ_BUFFER_SIZE            8192
 
+# ifndef VERSION
+#  define VERSION                       "snapshot"
+# endif
+
 typedef struct kt_key_s kt_key;
 typedef struct kt_args_s kt_args;
 typedef struct kt_pgpkeyid_s kt_pgpkeyid;
@@ -246,6 +250,8 @@ extern int ssh_write_str(BIO *bout, const char *str);
 extern unsigned char *ssh_write_bn(BIO *bout, BIGNUM *num, unsigned char *buf, size_t *buflen);
 
 extern int pgp_output(kt_key *key, BIO *bout, kt_args *args);
+extern int pgp_asc_output(kt_key *key, BIO *bout, kt_args *args);
+extern long pgp_crc24(unsigned char *octets, size_t len);
 extern int pgp_keyid(kt_key *key, BIO *bout, kt_args *args);
 extern int pgp_fingerprint(kt_key *key, BIO *bout, kt_args *args);
 

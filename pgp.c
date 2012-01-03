@@ -122,6 +122,75 @@ pgp_output(kt_key *key, BIO *bout, kt_args *args)
 	return 0;
 }
 
+/* "ASCII-Armored" PGP output */
+int
+pgp_asc_output(kt_key *key, BIO *bout, kt_args *args)
+{
+	BIO *b64, *bmem;
+	BUF_MEM *ptr;
+	unsigned long crc24;
+	unsigned char buf[3];
+	int r;
+
+	bmem = BIO_new(BIO_s_mem());
+	r = pgp_output(key, bmem, args);
+	if(r)
+	{
+		BIO_free(bmem);
+		return r;
+	}
+	BIO_get_mem_ptr(bmem, &ptr);
+	crc24 = pgp_crc24((unsigned char *) ptr->data, ptr->length);	
+	BIO_printf(bout, "-----BEGIN PGP PUBLIC KEY BLOCK-----\nVersion: Locksmith/" VERSION "\n\n");
+
+	b64 = BIO_new(BIO_f_base64());
+	bout = BIO_push(b64, bout);
+	BIO_write(bout, ptr->data, ptr->length);
+	BIO_free(bmem);
+	(void) BIO_flush(bout);
+	bout = BIO_pop(bout);
+
+	BIO_write(bout, "=", 1);
+	(void) BIO_reset(b64);
+	bout = BIO_push(b64, bout);
+	buf[0] = (crc24 >> 16) & 0xff;
+	buf[1] = (crc24 >> 8) & 0xff;
+	buf[2] = crc24 & 0xff;
+	BIO_write(bout, buf, 3);
+	(void) BIO_flush(bout);
+	bout = BIO_pop(bout);
+	BIO_free(b64);
+	BIO_printf(bout, "-----END PGP PUBLIC KEY BLOCK-----\n");
+	return 0;	
+}
+
+/* Calculate a PGP Radix-64 checksum
+ * RFC4800, Section 6.1
+ */
+
+#define CRC24_INIT 0xB704CEL
+#define CRC24_POLY 0x1864CFBL
+
+long
+pgp_crc24(unsigned char *octets, size_t len)
+{
+	long crc = CRC24_INIT;
+	int i;
+	while (len--)
+	{
+		crc ^= (*octets++) << 16;
+		for (i = 0; i < 8; i++)
+		{
+			crc <<= 1;
+			if (crc & 0x1000000)
+			{
+				crc ^= CRC24_POLY;
+			}
+		}
+	}
+	return crc & 0xFFFFFFL;
+}
+
 /* Print a PGP key fingerprint, as colon-separated octets in hexademical
  * form.
  */
