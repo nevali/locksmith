@@ -47,7 +47,7 @@ openssh_output(kt_key *k, BIO *bout, kt_args *args)
 	BIO_printf(bout, "%s ", ktype);
 	bout = BIO_push(b64, bout);
 	BIO_set_flags(bout, BIO_FLAGS_BASE64_NO_NL);
-	ssh_write_pubkey_bio(k, bout);
+	ssh_write_pubkey(bout, k);
 	(void) BIO_flush(bout);
 	bout = BIO_pop(bout);
 	if(args->comment)
