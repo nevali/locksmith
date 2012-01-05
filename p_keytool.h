@@ -240,6 +240,10 @@ extern int pem_output(kt_key *key, BIO *bout, kt_args *args);
 extern int der_input(kt_key *key, BIO *bout, kt_args *args);
 extern int der_output(kt_key *key, BIO *bout, kt_args *args);
 
+extern int x509_fingerprint(kt_key *k, BIO *bin, kt_args *args);
+extern int x509_detect(kt_key *k, BIO *bin, kt_args *args);
+extern int x509_input(kt_key *k, BIO *bin, kt_args *args);
+
 extern int openssh_output(kt_key *key, BIO *bout, kt_args *args);
 
 extern int ssh_output(kt_key *pubkey, BIO *bout, kt_args *args);
