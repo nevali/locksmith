@@ -66,13 +66,6 @@
 #define PGP_CT_ZLIB                     0x02
 #define PGP_CT_BZIP2                    0x03
 
-#define PGP_KF_CERT                     0x01
-#define PGP_KF_SIGN_DATA                0x02
-#define PGP_KF_CRYPT_COMMS              0x04
-#define PGP_KF_CRYPT_STORAGE            0x08
-#define PGP_KF_SPLIT                    0x10
-#define PGP_KF_AUTH                     0x20
-#define PGP_KF_SHARED                   0x80
 #define PGP_KF_DEFAULT \
 	(PGP_KF_CERT|PGP_KF_SIGN_DATA|PGP_KF_CRYPT_COMMS|PGP_KF_CRYPT_STORAGE|PGP_KF_AUTH)
 
@@ -112,7 +105,7 @@ pgp_output(kt_key *key, BIO *bout, kt_args *args)
 		{
 			pgp_write_userid_packet(bout, args->comment);
 			/* Sign the user ID using our key */
-			pgp_write_userid_sig_packet(bout, key, args->comment, PGP_SIG_USERID_SELF_DEFAULT, args->timestamp);
+			pgp_write_userid_sig_packet(bout, key, args->comment, PGP_SIG_USERID_SELF_DEFAULT, args->timestamp, args->keyusage);
 		}
 		else
 		{
@@ -382,7 +375,7 @@ pgp_write_key_material(BIO *bout, kt_key *key)
 
 /* Write an SHA-1 signature packet (0x01) for a user ID */
 int
-pgp_write_userid_sig_packet(BIO *bout, kt_key *key, const char *userid, int sigtype, time_t timestamp)
+pgp_write_userid_sig_packet(BIO *bout, kt_key *key, const char *userid, int sigtype, time_t timestamp, int keyusage)
 {
 	BIO *hashed, *unhashed, *target, *mem;
 	BUF_MEM *hashed_ptr, *unhashed_ptr, *target_ptr, *ptr;
@@ -394,8 +387,13 @@ pgp_write_userid_sig_packet(BIO *bout, kt_key *key, const char *userid, int sigt
 	 *   preferred hash algorithms, preferred compression algorithms,
 	 *   features, key-server preferences, creation time, primary user ID
 	 */
-	hashed = BIO_new(BIO_s_mem());	
-	pgp_write_keyflags_subpkt(hashed, PGP_KF_DEFAULT);
+	hashed = BIO_new(BIO_s_mem());
+	pgp_write_timestamp_subpkt(hashed, timestamp);
+	if(0 == keyusage)
+	{
+		keyusage = PGP_KF_DEFAULT;
+	}
+	pgp_write_keyflags_subpkt(hashed, keyusage);
 	algo[0] = PGP_ST_AES_256;
 	algo[1] = PGP_ST_AES_192;
 	algo[2] = PGP_ST_AES_128;
@@ -414,8 +412,7 @@ pgp_write_userid_sig_packet(BIO *bout, kt_key *key, const char *userid, int sigt
 	pgp_write_prefcomp_subpkt(hashed, algo, 3);
 	pgp_write_features_subpkt(hashed, PGP_FF_DEFAULT);
 	pgp_write_serverflags_subpkt(hashed, PGP_SF_DEFAULT);
-	pgp_write_timestamp_subpkt(hashed, timestamp);
-	pgp_write_primary_subpkt(hashed, 1);
+/*	pgp_write_primary_subpkt(hashed, 1); */
 	/* Unhashed subpackets: issuer key ID */
 	unhashed = BIO_new(BIO_s_mem());
 	if(key->keyid)

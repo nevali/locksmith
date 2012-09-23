@@ -96,6 +96,14 @@ typedef long ssize_t;
 #  define VERSION                       "snapshot"
 # endif
 
+# define PGP_KF_CERT                    0x01
+# define PGP_KF_SIGN_DATA               0x02
+# define PGP_KF_CRYPT_COMMS             0x04
+# define PGP_KF_CRYPT_STORAGE           0x08
+# define PGP_KF_SPLIT                   0x10
+# define PGP_KF_AUTH                    0x20
+# define PGP_KF_SHARED                  0x80
+
 typedef struct kt_key_s kt_key;
 typedef struct kt_args_s kt_args;
 typedef struct kt_pgpkeyid_s kt_pgpkeyid;
@@ -161,6 +169,7 @@ struct kt_args_s
 	int kts_explicit;
 	const char *domain;
 	int nsec3;
+	int keyusage;
 };
 
 struct kt_pgpkeyid_s
@@ -265,7 +274,7 @@ extern int pgp_fingerprint(kt_key *key, BIO *bout, kt_args *args);
 extern int pgp_write_pubkey_packet(BIO *bout, kt_key *key);
 extern int pgp_write_pubkey_packet_body(BIO *bout, kt_key *key, time_t timestamp);
 extern int pgp_write_userid_packet(BIO *bout, const char *userid);
-extern int pgp_write_userid_sig_packet(BIO *bout, kt_key *key, const char *userid, int sigtype, time_t timestamp);
+extern int pgp_write_userid_sig_packet(BIO *bout, kt_key *key, const char *userid, int sigtype, time_t timestamp, int keyusage);
 extern int pgp_write_sig_packet(BIO *bout, int sigtype, kt_key *key, BUF_MEM *target, BUF_MEM *hsub, BUF_MEM *uhsub);
 extern int pgp_write_sig_packet_body(BIO *bout, int sigtype, kt_key *key, BUF_MEM *target, BUF_MEM *hsub, BUF_MEM *uhsub);
 extern int pgp_write_keyflags_subpkt(BIO *bout, int flags);

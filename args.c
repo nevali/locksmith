@@ -21,8 +21,10 @@
 #include "p_keytool.h"
 
 static int process_extended_opt(const char *name, const char *value, kt_args *args);
+static int process_usage_opt(const char *str, kt_args *args);
 static int handle_extended_arg(const char *opt, kt_args *args);
 static int parse_timestamp(const char *ts, struct tm *tm);
+
 static void usage(void);
 
 int
@@ -119,7 +121,6 @@ kt_process_args(int argc, char **argv, kt_args *args, kt_key *key)
 			/* -Xopt[=value] -- Extended options */
 			if(handle_extended_arg(optarg, args))
 			{
-				usage();
 				return 1;
 			}
 			break;
@@ -136,7 +137,6 @@ kt_process_args(int argc, char **argv, kt_args *args, kt_key *key)
 			usage();
 			exit(0);
 		default:
-			usage();
 			return 1;
 		}
 	}
@@ -152,7 +152,7 @@ static int
 process_extended_opt(const char *name, const char *value, kt_args *args)
 {
 	int r;
-
+	
 	r = 1;
 	if(!strcmp(name, "unsigned"))
 	{
@@ -188,11 +188,27 @@ process_extended_opt(const char *name, const char *value, kt_args *args)
 			r = 3;
 		}
 	}
+	else if(!strcmp(name, "usage"))
+	{
+		if(*value)
+		{
+			r = 0;
+			if(process_usage_opt(value, args))
+			{
+				r = -1;
+			}
+		}
+		else
+		{
+			r = 3;
+		}
+	}
 	switch(r)
 	{
 	case -1:
 		break;
 	case 1:
+		fprintf(stderr, "x\n");
 		BIO_printf(args->berr, "%s: unrecognised option `-X%s'\n", progname, name);
 		break;
 	case 2:
@@ -204,6 +220,45 @@ process_extended_opt(const char *name, const char *value, kt_args *args)
 		break;
 	}
 	return r;
+}
+
+static int
+process_usage_opt(const char *str, kt_args *args)
+{
+	const char *p;
+	
+	args->keyusage = 0;
+	for(p = str; *p; p++)
+	{
+		switch(*p)
+		{
+		case 'c':
+			args->keyusage |= PGP_KF_CERT;
+			break;
+		case 's':
+			args->keyusage |= PGP_KF_SIGN_DATA;
+			break;
+		case 'e':
+			args->keyusage |= PGP_KF_CRYPT_COMMS;
+			break;
+		case 'E':
+			args->keyusage |= PGP_KF_CRYPT_STORAGE;
+			break;
+		case 'S':
+			args->keyusage |= PGP_KF_SPLIT;
+			break;
+		case 'a':
+			args->keyusage |= PGP_KF_AUTH;
+			break;
+		case 'h':
+			args->keyusage |= PGP_KF_SHARED;
+			break;
+		default:
+			BIO_printf(args->berr, "%s: unrecognised key usage flag `%c'\n", progname, *p);
+			return -1;
+		}
+	}
+	return 0;
 }
 
 static int
@@ -344,6 +399,9 @@ usage(void)
 	
 	fprintf(stderr, "PGP-specific options:\n"
 			"  -Xunsigned        Emit an unsigned user ID (requires -C)\n"
+			"  -Xusage=FLAGS     Specify key usage flags\n"
+			"    (e=encrypt, c=certify, s=sign, a=authenticate, E=encrypt storage, S=split\n"
+			"     key, h=shared key)\n"			
 			"\n");
 
 	fprintf(stderr, "DNSSEC-specific options:\n"
