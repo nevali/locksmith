@@ -307,6 +307,7 @@ static void
 usage(void)
 {
 	int c;
+	char caps[6];
 	kt_handler_entry *handlers;
 	kt_keytype_entry *keytypes;
 
@@ -358,7 +359,10 @@ usage(void)
 		{
 			continue;
 		}
-		fprintf(stderr, "  %-17s %s\n", handlers[c].name, handlers[c].desc);
+		caps[0] = (handlers[c].input != NULL ? 'r' : '-');
+		caps[1] = (handlers[c].output != NULL ? 'w' : '-');
+		caps[2] = 0;
+		fprintf(stderr, " [%s] %-17s %s\n", caps, handlers[c].name, handlers[c].desc);
 	}
 	fprintf(stderr, "\nFORMAT may be one of the following certificate-based formats:\n\n");
 	for(c = 0; handlers[c].name; c++)
@@ -367,9 +371,12 @@ usage(void)
 		{
 			continue;
 		}
-		fprintf(stderr, "  %-17s %s\n", handlers[c].name, handlers[c].desc);
+		caps[0] = (handlers[c].input != NULL ? 'r' : '-');
+		caps[1] = (handlers[c].output != NULL ? 'w' : '-');
+		caps[2] = 0;
+		fprintf(stderr, " [%s] %-17s %s\n", caps, handlers[c].name, handlers[c].desc);
 	}
-
+	fprintf(stderr, "\n(Key: r=can be read, w=can be written)\n");
 	keytypes = kt_types();
 	fprintf(stderr, "\nTYPE is one of:\n\n");   
 	for(c = 0; keytypes[c].name; c++)
