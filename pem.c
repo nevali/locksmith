@@ -20,13 +20,22 @@
 
 #include "p_keytool.h"
 
+/* Do not insert new entries into this array -- add them immediately above
+ * the NULL entry. The index into this array as passed to pem_input().
+ */
 static kt_match_string matchers[] =
 {
 	{ "-----BEGIN PUBLIC KEY-----", 0, 0 },
+
 	{ "-----BEGIN RSA PRIVATE KEY-----", 0, 1 },
 	{ "-----BEGIN DSA PRIVATE KEY-----", 0, 1 },
+
 	{ "-----BEGIN DSA PARAMETERS-----", 0, 0 },
 	{ "-----BEGIN DH PARAMETERS-----", 0, 0 },
+
+	{ "-----BEGIN RSA PUBLIC KEY-----", 0, 0 },
+	{ "-----BEGIN DSA PUBLIC KEY-----", 0, 0 },
+
 	{ NULL, 0, 0 }
 };
 
@@ -71,7 +80,7 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 	}
 	else if(args->detect_match_entry == 3)
 	{
-		/* DSA Parameters */
+		/* BEGIN DSA PARAMETERS */
 		k->type = KT_DSAPARAM;
 		if(!(k->k.dsa = PEM_read_bio_DSAparams(bin, NULL, callback, cbdata)))
 		{
@@ -83,7 +92,7 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 	}
 	else if(args->detect_match_entry == 4)
 	{
-		/* DH Parameters */
+		/* BEGIN DH PARAMETERS */
 		k->type = KT_DHPARAM;
 		if(!(k->k.dh = PEM_read_bio_DHparams(bin, NULL, callback, cbdata)))
 		{
@@ -91,6 +100,34 @@ pem_input(kt_key *k, BIO *bin, kt_args *args)
 			ERR_print_errors(args->berr);
 			return 1;
 		}				
+	}
+	else if(args->detect_match_entry == 5)
+	{
+		/* BEGIN RSA PUBLIC KEY */
+		k->type = KT_RSA;
+		if(!(k->k.rsa = PEM_read_bio_RSAPublicKey(bin, NULL, callback, cbdata)))
+		{
+			/* Try reading it as a SubjectPublicKeyInfo instead */
+			BIO_reset(bin);
+			pkey = PEM_ASN1_read_bio(d2i_PUBKEY, PEM_STRING_RSA_PUBLIC, bin, NULL, callback, cbdata);
+			if(!pkey)
+			{
+				BIO_printf(args->berr, "%s: PEM: unable to load RSA public key from %s\n", progname, args->infile);
+				ERR_print_errors(args->berr);
+				return 1;
+			}
+		}
+	}
+	else if(args->detect_match_entry == 6)
+	{
+		/* BEGIN DSA PUBLIC KEY */
+		pkey = PEM_ASN1_read_bio(d2i_PUBKEY, PEM_STRING_DSA_PUBLIC, bin, NULL, callback, cbdata);
+		if(!pkey)
+		{
+			BIO_printf(args->berr, "%s: PEM: unable to load DSA public key from %s\n", progname, args->infile);
+			ERR_print_errors(args->berr);
+			return 1;
+		}
 	}
 	else
 	{
