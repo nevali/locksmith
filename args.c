@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Mo McRoberts.
+ * Copyright 2011-2012 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -348,9 +348,22 @@ usage(void)
 			"\n");
 
 	handlers = kt_handlers();
-	fprintf(stderr, "FORMAT is one of:\n\n");
+	fprintf(stderr, "FORMAT may be one of the following key formats:\n\n");
 	for(c = 0; handlers[c].name; c++)
 	{
+		if(handlers[c].cert)
+		{
+			continue;
+		}
+		fprintf(stderr, "  %-17s %s\n", handlers[c].name, handlers[c].desc);
+	}
+	fprintf(stderr, "\nFORMAT may be one of the following certificate-based formats:\n\n");
+	for(c = 0; handlers[c].name; c++)
+	{
+		if(!handlers[c].cert)
+		{
+			continue;
+		}
 		fprintf(stderr, "  %-17s %s\n", handlers[c].name, handlers[c].desc);
 	}
 

@@ -22,21 +22,21 @@
 
 static kt_handler_entry handlers[] = 
 {
-	{ "text", "plain text", "Readable information about the key's contents", NULL, NULL, text_output, NULL, NULL },
-	{ "x509", "X.509", "PEM-encoded X.509 certificate", x509_detect, x509_input, NULL, x509_fingerprint, x509_fingerprint },
-	{ "pem", "PEM", "Privacy Enhanced Mail (PEM) format key", pem_detect, pem_input, pem_output, x509_fingerprint, x509_fingerprint },
-	{ "der", "DER", "ASN.1 Distinguished Encoding Rules (DER) format key", NULL, der_input, der_output, x509_fingerprint, x509_fingerprint },
-	{ "openssh", "OpenSSH", "OpenSSH key format", NULL, NULL, openssh_output, NULL, ssh_fingerprint },
-	{ "ssh2", "SSH-2", "SSH-2 (RFC4716) key format", NULL, NULL, ssh_output, NULL, ssh_fingerprint },
-	{ "pgp", "PGP", "OpenPGP (RFC4880) version 4 key format", NULL, NULL, pgp_asc_output, pgp_keyid, pgp_fingerprint },
-	{ "pgp-bin", "PGP", "OpenPGP (RFC4880) version 4 binary key format", NULL, NULL, pgp_output, pgp_keyid, pgp_fingerprint },
-	{ "rdfxml", "RDF/XML", "RDF/XML format", NULL, NULL, rdfxml_output, NULL, NULL },
-	{ "turtle", "Turtle", "RDF (Turtle) format", NULL, NULL, turtle_output, NULL, NULL },
-	{ "dnssec", "DNSSEC", "DNSSEC key format", NULL, NULL, dnssec_output, dnssec_keyid, NULL },
-	{ "ipgp", "CERT IPGP", "DNS CERT record (RFC4938) type 6 (indirect PGP)", NULL, NULL, cert_ipgp_output, pgp_keyid, pgp_fingerprint },
-	{ "pka", "PKA", "DNS PKA record", NULL, NULL, pka_output, pgp_keyid, pgp_fingerprint },	
-	{ "pkcs8", "PKCS#8", "PEM-format PKCS#8 keypairs", pkcs8_detect, pkcs8_input, pkcs8_output, x509_fingerprint, x509_fingerprint },
-	{ "sshfp", "SSHFP", "SSHFP record (RFC4255)", NULL, NULL, sshfp_output, NULL, ssh_fingerprint },
+	{ "text", "plain text", "Readable information about the key's contents", NULL, NULL, text_output, NULL, NULL, 0 },
+	{ "x509", "X.509", "PEM-encoded X.509 certificate", x509_detect, x509_input, NULL, x509_fingerprint, x509_fingerprint, 1 },
+	{ "pem", "PEM", "Privacy Enhanced Mail (PEM) format key", pem_detect, pem_input, pem_output, x509_fingerprint, x509_fingerprint, 0 },
+	{ "der", "DER", "ASN.1 Distinguished Encoding Rules (DER) format key", NULL, der_input, der_output, x509_fingerprint, x509_fingerprint, 0 },
+	{ "openssh", "OpenSSH", "OpenSSH key format", NULL, NULL, openssh_output, NULL, ssh_fingerprint, 0 },
+	{ "ssh2", "SSH-2", "SSH-2 (RFC4716) key format", NULL, NULL, ssh_output, NULL, ssh_fingerprint, 0 },
+	{ "pgp", "PGP", "OpenPGP (RFC4880) version 4 key format", NULL, NULL, pgp_asc_output, pgp_keyid, pgp_fingerprint, 1 },
+	{ "pgp-bin", "PGP", "OpenPGP (RFC4880) version 4 binary key format", NULL, NULL, pgp_output, pgp_keyid, pgp_fingerprint, 1 },
+	{ "rdfxml", "RDF/XML", "RDF/XML format", NULL, NULL, rdfxml_output, NULL, NULL, 0 },
+	{ "turtle", "Turtle", "RDF (Turtle) format", NULL, NULL, turtle_output, NULL, NULL, 0 },
+	{ "dnssec", "DNSSEC", "DNSSEC key format", NULL, NULL, dnssec_output, dnssec_keyid, NULL, 0 },
+	{ "ipgp", "CERT IPGP", "DNS CERT record (RFC4938) type 6 (indirect PGP)", NULL, NULL, cert_ipgp_output, pgp_keyid, pgp_fingerprint, 1 },
+	{ "pka", "PKA", "DNS PKA record", NULL, NULL, pka_output, pgp_keyid, pgp_fingerprint, 1 },	
+	{ "pkcs8", "PKCS#8", "PEM-format PKCS#8 keypairs", pkcs8_detect, pkcs8_input, pkcs8_output, x509_fingerprint, x509_fingerprint, 0 },
+	{ "sshfp", "SSHFP", "SSHFP record (RFC4255)", NULL, NULL, sshfp_output, NULL, ssh_fingerprint, 0 },
 	{ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 

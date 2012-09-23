@@ -186,6 +186,7 @@ struct kt_handler_entry_s
 	kt_output_handler output;
 	kt_keyid_handler keyid;
 	kt_fingerprint_handler fingerprint;
+	int cert;
 };
 
 struct kt_keytype_entry_s
