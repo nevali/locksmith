@@ -333,7 +333,10 @@ usage(void)
 			"  -C COMMENT        Key comment (SSH)/user ID (PGP)\n"
 			"  -Xopt[=value]     Format-specific options (see below)\n"
 			"\n", progname);
-
+	
+	fprintf(stderr, "Note that the fingerprint (-f) and key ID (-k) format is dependent\n"
+			        "upon the output format (-O). Use in combination with -n if only the\n"
+			"fingerprint/key ID output is required.\n\n");
 	fprintf(stderr, "Key generation options:\n"
 			"  -Xbits=NUM        Generate a key NUM bits in size\n"
 			"\n");
