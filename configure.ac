@@ -1,15 +1,34 @@
+## Copyright 2012-2013 Mo McRoberts.
+##
+##  Licensed under the Apache License, Version 2.0 (the "License");
+##  you may not use this file except in compliance with the License.
+##  You may obtain a copy of the License at
+##
+##      http://www.apache.org/licenses/LICENSE-2.0
+##
+##  Unless required by applicable law or agreed to in writing, software
+##  distributed under the License is distributed on an "AS IS" BASIS,
+##  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+##  See the License for the specific language governing permissions and
+##  limitations under the License.
+
 AC_INIT([locksmith],[develop])
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
 AM_MAINTAINER_MODE
 
-developer_CPPFLAGS='-W -Wall -O0 -g'
+AC_CONFIG_HEADER([config.h])
+
+BT_PROG_XCODE
+AC_PROG_CC([clang gcc c99 cc])
+BT_PROG_CC_WARN
+
+developer_CPPFLAGS='-O0 -g'
 
 if test x"$VERSION" = x"develop" ; then
    AC_MSG_RESULT([enabling developer-mode CPPFLAGS: $developer_CPPFLAGS])
-   CPPFLAGS="$CPPFLAGS $developer_CPPFLAGS"
+   AM_CPPFLAGS="$AM_CPPFLAGS $developer_CPPFLAGS"
 fi
-
-AC_PROG_CC
 
 PKG_CHECK_MODULES([libcrypto],[libcrypto >= 0.9.8],[
 	CPPFLAGS="$CPPFLAGS $libcrypto_CFLAGS"
@@ -23,9 +42,9 @@ AC_CHECK_HEADERS([unistd.h inttypes.h stdint.h sys/stat.h sys/types.h io.h])
 AC_HEADER_TIME
 AC_CHECK_FUNCS([strrchr getopt])
 
-AC_CONFIG_HEADERS([config.h])
-
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile
+m4/Makefile
+])
 
 AC_OUTPUT
 

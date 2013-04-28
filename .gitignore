@@ -1,6 +1,9 @@
 *.pem
 *.der
 *.pgp
+*.p8
+*.p7*
+*.p12
 *.asc
 *.o
 *.obj
@@ -18,6 +21,8 @@ Makefile
 /config.h
 /config.h.in*
 /config.log
+/config.sub
+/config.guess
 /config.status
 /autom4te.cache
 /aclocal.m4
